@@ -21,7 +21,7 @@ Dependency declaration:
 ## Usage
 
 Simply define a static initializer like this:
-```xml
+```java
 static {
   DynamicInstrumentationLoader.waitForInitialized();
   final GenericXmlApplicationContext ctx = new GenericXmlApplicationContext();
