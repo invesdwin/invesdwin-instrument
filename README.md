@@ -24,14 +24,13 @@ Simply define a static initializer like this:
 ```xml
 static {
   DynamicInstrumentationLoader.waitForInitialized();
+  final GenericXmlApplicationContext ctx = new GenericXmlApplicationContext();
+  ctx.load(new ClassPathResource("/META-INF/ctx.spring.weaving.xml"));
+  ctx.refresh();
 }
 ```
-Make sure that the instrumentation is loaded before the classes of the aspects or the classes that use the aspects are loaded in the classloader, since only classes that have not been loaded yet will be successfully weaved by aspectj.
 
-Please note that you need to have a JDK installed with `tools.jar` available in it for this to work properly.
-Alternatively just load the invesdwin-instrument jar via the `-javaagent <path>` JVM parameter if you only have a JRE installed. The dynamic loading will be skipped then.
-
-To load aspectj load time weaver, you can just instantiate a spring `GenericXmlApplicationContext` with the following xml:
+The `ctx.spring.weaving.xml` to load aspectj load time weaver should contain the following:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -46,3 +45,8 @@ To load aspectj load time weaver, you can just instantiate a spring `GenericXmlA
 
 </beans>
 ```
+
+Make sure that the instrumentation is loaded before the classes of the aspects or the classes that use the aspects are loaded in the classloader, since only classes that have not been loaded yet will be successfully weaved by aspectj.
+
+Please note that you need to have a JDK installed with `tools.jar` available in it for this to work properly.
+Alternatively just load the invesdwin-instrument jar via the `-javaagent <path>` JVM parameter if you only have a JRE installed. The dynamic loading will be skipped then.
