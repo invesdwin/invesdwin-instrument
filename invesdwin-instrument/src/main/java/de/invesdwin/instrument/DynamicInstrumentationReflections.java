@@ -29,14 +29,23 @@ public final class DynamicInstrumentationReflections {
         try {
             final String normalizedPath = FilenameUtils.normalize(dirOrJar.getAbsolutePath());
             org.assertj.core.api.Assertions.assertThat(pathsAddedToSystemClassLoader.add(normalizedPath))
-                    .as("Path [%s] has already been added before!", normalizedPath)
-                    .isTrue();
+            .as("Path [%s] has already been added before!", normalizedPath)
+            .isTrue();
             final Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
             method.setAccessible(true);
             final URL url = new File(normalizedPath).toURI().toURL();
             method.invoke(ClassLoader.getSystemClassLoader(), url);
-        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
-                | InvocationTargetException | MalformedURLException e) {
+        } catch (final NoSuchMethodException e) {
+            org.springframework.util.ReflectionUtils.handleReflectionException(e);
+        } catch (final SecurityException e) {
+            org.springframework.util.ReflectionUtils.handleReflectionException(e);
+        } catch (final IllegalAccessException e) {
+            org.springframework.util.ReflectionUtils.handleReflectionException(e);
+        } catch (final IllegalArgumentException e) {
+            org.springframework.util.ReflectionUtils.handleReflectionException(e);
+        } catch (final MalformedURLException e) {
+            org.springframework.util.ReflectionUtils.handleReflectionException(e);
+        } catch (final InvocationTargetException e) {
             org.springframework.util.ReflectionUtils.handleReflectionException(e);
         }
     }
@@ -66,7 +75,13 @@ public final class DynamicInstrumentationReflections {
             final Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
             fieldSysPath.setAccessible(true);
             fieldSysPath.set(ClassLoader.class, null);
-        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+        } catch (final NoSuchFieldException e) {
+            org.springframework.util.ReflectionUtils.handleReflectionException(e);
+        } catch (final SecurityException e) {
+            org.springframework.util.ReflectionUtils.handleReflectionException(e);
+        } catch (final IllegalArgumentException e) {
+            org.springframework.util.ReflectionUtils.handleReflectionException(e);
+        } catch (final IllegalAccessException e) {
             org.springframework.util.ReflectionUtils.handleReflectionException(e);
         }
     }
