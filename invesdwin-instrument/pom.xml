@@ -22,6 +22,9 @@
 		<version.assertj-core>1.7.0</version.assertj-core>
 		<version.jsr305>2.0.1</version.jsr305>
 		<version.spring>4.1.6.RELEASE</version.spring>
+		<version.aspectj>1.8.5</version.aspectj>
+
+		<version.junit>4.12</version.junit>
 	</properties>
 
 	<dependencies>
@@ -54,6 +57,18 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-instrument</artifactId>
 			<version>${version.spring}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+			<version>${version.aspectj}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${version.junit}</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 

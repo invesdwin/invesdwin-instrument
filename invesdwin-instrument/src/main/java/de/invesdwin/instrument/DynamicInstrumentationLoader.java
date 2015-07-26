@@ -11,6 +11,8 @@ import java.util.zip.ZipEntry;
 import javax.annotation.concurrent.ThreadSafe;
 
 import org.apache.commons.io.IOUtils;
+import org.springframework.context.support.GenericXmlApplicationContext;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
 
 import de.invesdwin.instrument.internal.DynamicInstrumentationAgent;
@@ -38,6 +40,14 @@ public final class DynamicInstrumentationLoader {
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    public static GenericXmlApplicationContext initLoadTimeWeavingContext() {
+        org.assertj.core.api.Assertions.assertThat(isInitialized()).isTrue();
+        final GenericXmlApplicationContext ctx = new GenericXmlApplicationContext();
+        ctx.load(new ClassPathResource("/META-INF/ctx.spring.weaving.xml"));
+        ctx.refresh();
+        return ctx;
     }
 
     static {
