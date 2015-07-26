@@ -22,6 +22,10 @@ import de.invesdwin.instrument.internal.JdkFilesFinder;
 public final class DynamicInstrumentationLoader {
 
     private static volatile Throwable threadFailed;
+    /**
+     * keeping a reference here so it is not garbage collected
+     */
+    private static GenericXmlApplicationContext ltwCtx;
 
     private DynamicInstrumentationLoader() {}
 
@@ -42,12 +46,15 @@ public final class DynamicInstrumentationLoader {
         }
     }
 
-    public static GenericXmlApplicationContext initLoadTimeWeavingContext() {
+    public static synchronized GenericXmlApplicationContext initLoadTimeWeavingContext() {
         org.assertj.core.api.Assertions.assertThat(isInitialized()).isTrue();
-        final GenericXmlApplicationContext ctx = new GenericXmlApplicationContext();
-        ctx.load(new ClassPathResource("/META-INF/ctx.spring.weaving.xml"));
-        ctx.refresh();
-        return ctx;
+        if (ltwCtx == null) {
+            final GenericXmlApplicationContext ctx = new GenericXmlApplicationContext();
+            ctx.load(new ClassPathResource("/META-INF/ctx.spring.weaving.xml"));
+            ctx.refresh();
+            ltwCtx = ctx;
+        }
+        return ltwCtx;
     }
 
     static {
