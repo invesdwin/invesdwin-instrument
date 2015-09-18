@@ -174,8 +174,8 @@
 				<configuration>
 					<archive>
 						<manifestEntries>
-							<Premain-Class>de.invesdwin.common.instrument.internal.DynamicInstrumentationAgent</Premain-Class>
-							<Agent-Class>de.invesdwin.common.instrument.internal.DynamicInstrumentationAgent</Agent-Class>
+							<Premain-Class>de.invesdwin.instrument.internal.DynamicInstrumentationAgent</Premain-Class>
+							<Agent-Class>de.invesdwin.instrument.internal.DynamicInstrumentationAgent</Agent-Class>
 							<Can-Redefine-Classes>true</Can-Redefine-Classes>
 							<Can-Retransform-Classes>true</Can-Retransform-Classes>
 						</manifestEntries>
