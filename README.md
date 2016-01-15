@@ -27,6 +27,22 @@ static {
   DynamicInstrumentationLoader.initLoadTimeWeavingContext();
 }
 ```
+With [spring-boot](http://projects.spring.io/spring-boot/) you have to ensure to only have one Application context by importing the one responsible for initializing the load time weaving:
+```java
+@SpringBootApplication
+@ImportResource(locations = "classpath:/META-INF/ctx.spring.weaving.xml")
+public class MySpringBootApplication {
+    static {
+      DynamicInstrumentationLoader.waitForInitialized();
+    }
+    
+    public static void main(final String[] args) {
+        SpringApplication.run(MySpringBootApplication.class, args);
+    }
+}
+```
+To enable the spring aspects, just add the [spring-aspects.jar](http://mvnrepository.com/artifact/org.springframework/spring-aspects) dependency to your project, they are enabled directly, others need a [aop.xml](http://www.springbyexample.org/examples/aspectj-ltw-aspectj-config.html) to be configured.
+
 
 Make sure that the instrumentation is loaded before the classes of the aspects or the classes that use the aspects are loaded in the classloader, since only classes that have not been loaded yet will be successfully weaved by aspectj.
 
