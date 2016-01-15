@@ -32,11 +32,8 @@ With [spring-boot](http://projects.spring.io/spring-boot/) you have to ensure to
 @SpringBootApplication
 @ImportResource(locations = "classpath:/META-INF/ctx.spring.weaving.xml")
 public class MySpringBootApplication {
-    static {
-      DynamicInstrumentationLoader.waitForInitialized();
-    }
-    
     public static void main(final String[] args) {
+        DynamicInstrumentationLoader.waitForInitialized();
         SpringApplication.run(MySpringBootApplication.class, args);
     }
 }
