@@ -23,7 +23,7 @@ Dependency declaration:
 Simply define a static initializer like this:
 ```java
 static {
-  DynamicInstrumentationLoader.waitForInitialized();
+  DynamicInstrumentationLoader.waitForInitialized(); //dynamically attach java agent to jvm if not already present
   DynamicInstrumentationLoader.initLoadTimeWeavingContext(); //weave all classes before they are loaded as beans
 }
 ```
@@ -33,7 +33,7 @@ With [spring-boot](http://projects.spring.io/spring-boot/) you have to ensure th
 @ImportResource(locations = "classpath:/META-INF/ctx.spring.weaving.xml") //make @Configurable work
 public class MySpringBootApplication {
     public static void main(final String[] args) {
-        DynamicInstrumentationLoader.waitForInitialized();
+        DynamicInstrumentationLoader.waitForInitialized(); //dynamically attach java agent to jvm if not already present
         DynamicInstrumentationLoader.initLoadTimeWeavingContext(); //weave all classes before they are loaded as beans
         SpringApplication.run(MySpringBootApplication.class, args);
     }
