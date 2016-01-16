@@ -34,6 +34,7 @@ With [spring-boot](http://projects.spring.io/spring-boot/) you have to ensure to
 public class MySpringBootApplication {
     public static void main(final String[] args) {
         DynamicInstrumentationLoader.waitForInitialized();
+        DynamicInstrumentationLoader.initLoadTimeWeavingContext();
         SpringApplication.run(MySpringBootApplication.class, args);
     }
 }
