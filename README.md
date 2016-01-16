@@ -47,4 +47,4 @@ Make sure that the instrumentation is loaded before the classes of the aspects o
 Please note that you need to have a JDK installed with `tools.jar` available in it for this to work properly.
 Alternatively just load the invesdwin-instrument jar via the `-javaagent <path>` JVM parameter if you only have a JRE installed. The dynamic loading will be skipped then.
 
-For a sample usage see the junit test cases in the [invesdwin-aspects](https://github.com/subes/invesdwin-aspects) project.
+For a sample usage see the junit test cases in the [invesdwin-aspects](https://github.com/subes/invesdwin-aspects) project or the spring-boot example project in [invesdwin-nowicket](https://github.com/subes/invesdwin-nowicket).
