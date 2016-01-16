@@ -42,7 +42,7 @@ public class MySpringBootApplication {
 To enable the spring aspects, just add the [spring-aspects.jar](http://mvnrepository.com/artifact/org.springframework/spring-aspects) dependency to your project, they are enabled directly, others might need a [aop.xml](http://www.springbyexample.org/examples/aspectj-ltw-aspectj-config.html) to be enabled.
 
 
-Make sure that the instrumentation is loaded before the classes of the aspects or the classes that use the aspects are loaded in the classloader, since only classes that have not been loaded yet will be successfully weaved by aspectj.
+Make sure that the instrumentation is loaded before the classes of the aspects or the classes that use the aspects are loaded by the classloader. Only classes that get loaded after initializing load time weaving will be successfully weaved by aspectj.
 
 Please note that you need to have a JDK installed with `tools.jar` available in it for this to work properly.
 Alternatively just load the invesdwin-instrument jar via the `-javaagent <path>` JVM parameter if you only have a JRE installed. The dynamic loading will be skipped then.
