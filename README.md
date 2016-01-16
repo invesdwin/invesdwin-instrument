@@ -35,7 +35,7 @@ public class MySpringBootApplication {
     public static void main(final String[] args) {
         DynamicInstrumentationLoader.waitForInitialized(); //dynamically attach java agent to jvm if not already present
         DynamicInstrumentationLoader.initLoadTimeWeavingContext(); //weave all classes before they are loaded as beans
-        SpringApplication.run(MySpringBootApplication.class, args);
+        SpringApplication.run(MySpringBootApplication.class, args); //start application, load some classes
     }
 }
 ```
