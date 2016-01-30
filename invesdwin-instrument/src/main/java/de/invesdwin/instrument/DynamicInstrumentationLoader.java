@@ -2,6 +2,7 @@ package de.invesdwin.instrument;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.JarOutputStream;
@@ -112,9 +113,11 @@ public final class DynamicInstrumentationLoader {
         final JarOutputStream tempAgentJarOut = new JarOutputStream(new FileOutputStream(tempAgentJar), manifest);
         final ZipEntry entry = new ZipEntry(agentClassName.replace(".", "/") + ".class");
         tempAgentJarOut.putNextEntry(entry);
-        IOUtils.copy(
-                DynamicInstrumentationAgent.class.getProtectionDomain().getCodeSource().getLocation().openStream(),
-                tempAgentJarOut);
+        final InputStream agentClassIn = DynamicInstrumentationAgent.class.getProtectionDomain()
+                .getCodeSource()
+                .getLocation()
+                .openStream();
+        IOUtils.copy(agentClassIn, tempAgentJarOut);
         tempAgentJarOut.closeEntry();
         tempAgentJarOut.close();
         return tempAgentJar;
