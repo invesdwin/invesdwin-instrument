@@ -7,6 +7,13 @@
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
+	<licenses>
+		<license>
+			<name>GNU Lesser General Public License (LGPL), Version 3.0</name>
+			<url>http://www.gnu.org/licenses/lgpl-3.0.html</url>
+		</license>
+	</licenses>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -17,6 +24,7 @@
 		<version.maven-processor-plugin>2.2.4</version.maven-processor-plugin>
 		<version.invesdwin-maven-plugin>1.0.0-SNAPSHOT</version.invesdwin-maven-plugin>
 		<version.maven-jar-plugin>2.3.2</version.maven-jar-plugin>
+		<version.license-check-maven-plugin>0.5.4-inv</version.license-check-maven-plugin>
 
 		<version.commons-io>2.4</version.commons-io>
 
@@ -185,6 +193,29 @@
 							<Can-Retransform-Classes>true</Can-Retransform-Classes>
 						</manifestEntries>
 					</archive>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.complykit</groupId>
+				<artifactId>license-check-maven-plugin</artifactId>
+				<version>${version.license-check-maven-plugin}</version>
+				<executions>
+					<execution>
+						<phase>verify</phase>
+						<goals>
+							<goal>os-check</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<blacklist>
+						<param>agpl-1.0</param>
+						<param>agpl-2.0</param>
+						<param>agpl-3.0</param>
+						<param>gpl-1.0</param>
+						<param>gpl-2.0</param>
+						<param>gpl-3.0</param>
+					</blacklist>
 				</configuration>
 			</plugin>
 		</plugins>
