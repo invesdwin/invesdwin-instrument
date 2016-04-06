@@ -113,14 +113,28 @@ public final class DynamicInstrumentationLoader {
         final JarOutputStream tempAgentJarOut = new JarOutputStream(new FileOutputStream(tempAgentJar), manifest);
         final ZipEntry entry = new ZipEntry(agentClassName.replace(".", "/") + ".class");
         tempAgentJarOut.putNextEntry(entry);
-        final InputStream agentClassIn = DynamicInstrumentationAgent.class.getProtectionDomain()
-                .getCodeSource()
-                .getLocation()
-                .openStream();
+        final InputStream agentClassIn = getAgentClassInputStream();
         IOUtils.copy(agentClassIn, tempAgentJarOut);
         tempAgentJarOut.closeEntry();
         tempAgentJarOut.close();
         return tempAgentJar;
+    }
+
+    private static InputStream getAgentClassInputStream() throws ClassNotFoundException {
+        try {
+            final InputStream agentClassIn = DynamicInstrumentationAgent.class.getProtectionDomain()
+                    .getCodeSource()
+                    .getLocation()
+                    .openStream();
+            return agentClassIn;
+        } catch (final Throwable e) {
+            final String message = "Unable to find class [de.invesdwin.instrument.internal.DynamicInstrumentationAgent] in classpath."
+                    + "\nPlease make sure you have added invesdwin-instrument.jar to your classpath properly,"
+                    + "\nor make sure you have embedded it correctly into your fat-jar."
+                    + "\nThey can be created e.g. with \"maven-shade-plugin\"."
+                    + "\nPlease be aware that \"one-jar\" might now not work well due to classloader issues.";
+            throw new ClassNotFoundException(message, e);
+        }
     }
 
 }
