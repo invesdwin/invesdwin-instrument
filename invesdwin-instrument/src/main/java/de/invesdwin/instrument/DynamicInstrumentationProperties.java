@@ -52,4 +52,10 @@ public final class DynamicInstrumentationProperties {
         return tempDir;
     }
 
+    public static String getProcessId() {
+        final String nameOfRunningVM = ManagementFactory.getRuntimeMXBean().getName();
+        final String pid = nameOfRunningVM.substring(0, nameOfRunningVM.indexOf('@'));
+        return pid;
+    }
+
 }

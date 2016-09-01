@@ -3,7 +3,6 @@ package de.invesdwin.instrument;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.lang.management.ManagementFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
@@ -62,8 +61,7 @@ public final class DynamicInstrumentationLoader {
         if (!isInitialized()) {
             try {
                 final File tempAgentJar = createTempAgentJar();
-                final String nameOfRunningVM = ManagementFactory.getRuntimeMXBean().getName();
-                final String pid = nameOfRunningVM.substring(0, nameOfRunningVM.indexOf('@'));
+                final String pid = DynamicInstrumentationProperties.getProcessId();
                 final Thread loadAgentThread = new Thread() {
 
                     @Override
