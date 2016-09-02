@@ -26,8 +26,6 @@
 		<version.maven-jar-plugin>2.3.2</version.maven-jar-plugin>
 		<version.license-check-maven-plugin>0.5.4-inv</version.license-check-maven-plugin>
 
-		<version.commons-io>2.4</version.commons-io>
-
 		<version.invesdwin-bom>1.0.0-SNAPSHOT</version.invesdwin-bom>
 	</properties>
 
@@ -47,7 +45,6 @@
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>${version.commons-io}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.assertj</groupId>
