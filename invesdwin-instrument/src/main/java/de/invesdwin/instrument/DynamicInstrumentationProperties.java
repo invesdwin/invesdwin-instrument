@@ -17,13 +17,16 @@ public final class DynamicInstrumentationProperties {
     public static final File TEMP_DIRECTORY;
 
     static {
-        TEMP_DIRECTORY = getTempDirectory();
+        //CHECKSTYLE:OFF
+        final String systemTempDir = System.getProperty("java.io.tmpdir");
+        //CHECKSTYLE:ON
+        TEMP_DIRECTORY = newTempDirectory(new File(systemTempDir));
     }
 
     private DynamicInstrumentationProperties() {}
 
-    private static File getTempDirectory() {
-        final File tempDir = findEmptyTempDir();
+    public static File newTempDirectory(final File baseDirectory) {
+        final File tempDir = findEmptyTempDir(baseDirectory);
         try {
             FileUtils.forceMkdir(tempDir);
         } catch (final IOException e) {
@@ -38,11 +41,8 @@ public final class DynamicInstrumentationProperties {
         return tempDir;
     }
 
-    private static File findEmptyTempDir() {
-        //CHECKSTYLE:OFF
-        final String systemTempDir = System.getProperty("java.io.tmpdir");
-        //CHECKSTYLE:ON
-        File tempDir = new File(systemTempDir, ManagementFactory.getRuntimeMXBean().getName());
+    private static File findEmptyTempDir(final File baseDirectory) {
+        File tempDir = new File(baseDirectory, ManagementFactory.getRuntimeMXBean().getName());
         int retry = 0;
         while (tempDir.exists() && !FileUtils.deleteQuietly(tempDir)) {
             //no permission to delete folder (maybe different user had this pid before), choose a different one
