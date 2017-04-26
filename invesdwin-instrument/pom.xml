@@ -252,25 +252,25 @@
 		<repository>
 			<id>central</id>
 			<name>invesdwin.de-releases</name>
-			<url>http://invesdwin.de/artifactory/invesdwin-oss-remote</url>
+			<url>http://invesdwin.de/artifactory/invesdwin-oss</url>
 		</repository>
 		<snapshotRepository>
 			<id>snapshots</id>
 			<name>invesdwin.de-snapshots</name>
-			<url>http://invesdwin.de/artifactory/invesdwin-oss-remote</url>
+			<url>http://invesdwin.de/artifactory/invesdwin-oss</url>
 		</snapshotRepository>
 	</distributionManagement>
 
 	<repositories>
 		<repository>
 			<id>invesdwin-oss</id>
-			<url>http://invesdwin.de/artifactory/invesdwin-oss</url>
+			<url>http://invesdwin.de/artifactory/invesdwin-oss-remote</url>
 		</repository>
 	</repositories>
 	<pluginRepositories>
 		<pluginRepository>
 			<id>invesdwin-oss</id>
-			<url>http://invesdwin.de/artifactory/invesdwin-oss</url>
+			<url>http://invesdwin.de/artifactory/invesdwin-oss-remote</url>
 		</pluginRepository>
 	</pluginRepositories>
 	
