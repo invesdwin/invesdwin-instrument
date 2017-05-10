@@ -26,11 +26,14 @@ public final class DynamicInstrumentationReflections {
      * http://stackoverflow.com/questions/1010919/adding-files-to-java-classpath-at-runtime
      */
     public static void addPathToSystemClassLoader(final File dirOrJar) {
+        if (dirOrJar == null) {
+            return;
+        }
         try {
             final String normalizedPath = FilenameUtils.normalize(dirOrJar.getAbsolutePath());
             org.assertj.core.api.Assertions.assertThat(pathsAddedToSystemClassLoader.add(normalizedPath))
-            .as("Path [%s] has already been added before!", normalizedPath)
-            .isTrue();
+                    .as("Path [%s] has already been added before!", normalizedPath)
+                    .isTrue();
             final Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
             method.setAccessible(true);
             final URL url = new File(normalizedPath).toURI().toURL();
@@ -58,6 +61,9 @@ public final class DynamicInstrumentationReflections {
      * http://stackoverflow.com/questions/11134159/how-to-load-attachprovider-attach-dll-dynamically
      */
     public static void addPathToJavaLibraryPath(final File dir) {
+        if (dir == null) {
+            return;
+        }
         try {
             final String javaLibraryPathKey = "java.library.path";
             //CHECKSTYLE:OFF
