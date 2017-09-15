@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
+import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
-import java.util.zip.ZipEntry;
 
 import javax.annotation.concurrent.ThreadSafe;
 
@@ -109,7 +109,7 @@ public final class DynamicInstrumentationLoader {
         manifest.getMainAttributes().putValue("Can-Redefine-Classes", String.valueOf(true));
         manifest.getMainAttributes().putValue("Can-Retransform-Classes", String.valueOf(true));
         final JarOutputStream tempAgentJarOut = new JarOutputStream(new FileOutputStream(tempAgentJar), manifest);
-        final ZipEntry entry = new ZipEntry(agentClassName.replace(".", "/") + ".class");
+        final JarEntry entry = new JarEntry(agentClassName.replace(".", "/") + ".class");
         tempAgentJarOut.putNextEntry(entry);
         final InputStream agentClassIn = getAgentClassInputStream();
         IOUtils.copy(agentClassIn, tempAgentJarOut);
