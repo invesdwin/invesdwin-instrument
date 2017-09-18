@@ -120,8 +120,12 @@ public final class DynamicInstrumentationLoader {
 
     private static InputStream getAgentClassInputStream() throws ClassNotFoundException {
         try {
-            final InputStream agentClassIn = DynamicInstrumentationAgent.class.getResourceAsStream(
-                    "/" + DynamicInstrumentationAgent.class.getName().replace(".", "/") + ".class");
+            final Class<?> clazz = DynamicInstrumentationAgent.class;
+            final String name = clazz.getSimpleName() + ".class";
+            final InputStream agentClassIn = clazz.getResourceAsStream(name);
+            if (agentClassIn == null) {
+                throw new NullPointerException("agentClassIn should not be null");
+            }
             return agentClassIn;
         } catch (final Throwable e) {
             final String message = "Unable to find class [de.invesdwin.instrument.internal.DynamicInstrumentationAgent] in classpath."
