@@ -37,7 +37,7 @@ public final class DynamicInstrumentationReflections {
             final Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
             method.setAccessible(true);
             final URL url = new File(normalizedPath).toURI().toURL();
-            method.invoke(ClassLoader.getSystemClassLoader(), url);
+            method.invoke(getSystemClassLoader(), url);
         } catch (final NoSuchMethodException e) {
             org.springframework.util.ReflectionUtils.handleReflectionException(e);
         } catch (final SecurityException e) {
@@ -51,6 +51,14 @@ public final class DynamicInstrumentationReflections {
         } catch (final InvocationTargetException e) {
             org.springframework.util.ReflectionUtils.handleReflectionException(e);
         }
+    }
+
+    public static ClassLoader getContextClassLoader() {
+        return Thread.currentThread().getContextClassLoader();
+    }
+
+    public static ClassLoader getSystemClassLoader() {
+        return ClassLoader.getSystemClassLoader();
     }
 
     public static Set<String> getPathsAddedToSystemClassLoader() {
@@ -91,4 +99,5 @@ public final class DynamicInstrumentationReflections {
             org.springframework.util.ReflectionUtils.handleReflectionException(e);
         }
     }
+
 }

@@ -3,6 +3,7 @@ package de.invesdwin.instrument;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
@@ -15,6 +16,7 @@ import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
 
+import de.invesdwin.instrument.internal.AgentClassLoaderReference;
 import de.invesdwin.instrument.internal.DynamicInstrumentationAgent;
 import de.invesdwin.instrument.internal.JdkFilesFinder;
 
@@ -61,6 +63,7 @@ public final class DynamicInstrumentationLoader {
         if (!isInitialized()) {
             try {
                 final File tempAgentJar = createTempAgentJar();
+                setAgentClassLoaderReference();
                 final String pid = DynamicInstrumentationProperties.getProcessId();
                 final Thread loadAgentThread = new Thread() {
 
@@ -96,37 +99,21 @@ public final class DynamicInstrumentationLoader {
         }
     }
 
-    /**
-     * Creates a new jar that only contains the DynamicInstrumentationAgent class.
-     */
-    private static File createTempAgentJar() throws Exception {
-        final String agentClassName = DynamicInstrumentationAgent.class.getName();
-        final File tempAgentJar = new File(DynamicInstrumentationProperties.TEMP_DIRECTORY, agentClassName + ".jar");
-        final Manifest manifest = new Manifest(
-                DynamicInstrumentationLoader.class.getResourceAsStream("/META-INF/MANIFEST.MF"));
-        manifest.getMainAttributes().putValue("Premain-Class", agentClassName);
-        manifest.getMainAttributes().putValue("Agent-Class", agentClassName);
-        manifest.getMainAttributes().putValue("Can-Redefine-Classes", String.valueOf(true));
-        manifest.getMainAttributes().putValue("Can-Retransform-Classes", String.valueOf(true));
-        final JarOutputStream tempAgentJarOut = new JarOutputStream(new FileOutputStream(tempAgentJar), manifest);
-        final JarEntry entry = new JarEntry(agentClassName.replace(".", "/") + ".class");
-        tempAgentJarOut.putNextEntry(entry);
-        final InputStream agentClassIn = getAgentClassInputStream();
-        IOUtils.copy(agentClassIn, tempAgentJarOut);
-        tempAgentJarOut.closeEntry();
-        tempAgentJarOut.close();
-        return tempAgentJar;
+    private static void setAgentClassLoaderReference() throws Exception {
+        final Class<AgentClassLoaderReference> agentClassLoaderReferenceClass = AgentClassLoaderReference.class;
+        final File tempAgentClassLoaderJar = createTempJar(agentClassLoaderReferenceClass, false);
+        DynamicInstrumentationReflections.addPathToSystemClassLoader(tempAgentClassLoaderJar);
+        final ClassLoader systemClassLoader = DynamicInstrumentationReflections.getSystemClassLoader();
+        final Class<?> systemAgentClassLoaderReferenceClass = systemClassLoader
+                .loadClass(agentClassLoaderReferenceClass.getName());
+        final Method setAgentClassLoaderMethod = systemAgentClassLoaderReferenceClass
+                .getDeclaredMethod("setAgentClassLoader", ClassLoader.class);
+        setAgentClassLoaderMethod.invoke(null, DynamicInstrumentationReflections.getContextClassLoader());
     }
 
-    private static InputStream getAgentClassInputStream() throws ClassNotFoundException {
+    private static File createTempAgentJar() throws ClassNotFoundException {
         try {
-            final Class<?> clazz = DynamicInstrumentationAgent.class;
-            final String name = clazz.getSimpleName() + ".class";
-            final InputStream agentClassIn = clazz.getResourceAsStream(name);
-            if (agentClassIn == null) {
-                throw new NullPointerException("agentClassIn should not be null");
-            }
-            return agentClassIn;
+            return createTempJar(DynamicInstrumentationAgent.class, true);
         } catch (final Throwable e) {
             final String message = "Unable to find class [de.invesdwin.instrument.internal.DynamicInstrumentationAgent] in classpath."
                     + "\nPlease make sure you have added invesdwin-instrument.jar to your classpath properly,"
@@ -135,6 +122,38 @@ public final class DynamicInstrumentationLoader {
                     + "\nPlease be aware that \"one-jar\" might now not work well due to classloader issues.";
             throw new ClassNotFoundException(message, e);
         }
+    }
+
+    /**
+     * Creates a new jar that only contains the DynamicInstrumentationAgent class.
+     */
+    private static File createTempJar(final Class<?> clazz, final boolean agent) throws Exception {
+        final String className = clazz.getName();
+        final File tempAgentJar = new File(DynamicInstrumentationProperties.TEMP_DIRECTORY, className + ".jar");
+        final Manifest manifest = new Manifest(clazz.getResourceAsStream("/META-INF/MANIFEST.MF"));
+        if (agent) {
+            manifest.getMainAttributes().putValue("Premain-Class", className);
+            manifest.getMainAttributes().putValue("Agent-Class", className);
+            manifest.getMainAttributes().putValue("Can-Redefine-Classes", String.valueOf(true));
+            manifest.getMainAttributes().putValue("Can-Retransform-Classes", String.valueOf(true));
+        }
+        final JarOutputStream tempJarOut = new JarOutputStream(new FileOutputStream(tempAgentJar), manifest);
+        final JarEntry entry = new JarEntry(className.replace(".", "/") + ".class");
+        tempJarOut.putNextEntry(entry);
+        final InputStream classIn = getClassInputStream(clazz);
+        IOUtils.copy(classIn, tempJarOut);
+        tempJarOut.closeEntry();
+        tempJarOut.close();
+        return tempAgentJar;
+    }
+
+    private static InputStream getClassInputStream(final Class<?> clazz) throws ClassNotFoundException {
+        final String name = "/" + clazz.getName().replace(".", "/") + ".class";
+        final InputStream agentClassIn = clazz.getResourceAsStream(name);
+        if (agentClassIn == null) {
+            throw new NullPointerException("resource input stream should not be null: " + name);
+        }
+        return agentClassIn;
     }
 
 }
