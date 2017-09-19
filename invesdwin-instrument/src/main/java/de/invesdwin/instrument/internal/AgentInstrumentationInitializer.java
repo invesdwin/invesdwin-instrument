@@ -14,7 +14,8 @@ public final class AgentInstrumentationInitializer {
 
     public static void initialize(final String args, final Instrumentation inst) {
         if (InstrumentationLoadTimeWeaver.isInstrumentationAvailable()) {
-            throw new IllegalStateException("instrumentation is already available, the agent should have been loaded!");
+            throw new IllegalStateException(
+                    "instrumentation is already available, the agent should have been loaded already!");
         }
 
         InstrumentationSavingAgent.premain(args, inst);
