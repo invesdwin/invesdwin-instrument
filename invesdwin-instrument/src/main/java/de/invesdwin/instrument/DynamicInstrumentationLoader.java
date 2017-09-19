@@ -119,7 +119,7 @@ public final class DynamicInstrumentationLoader {
                     + "\nPlease make sure you have added invesdwin-instrument.jar to your classpath properly,"
                     + "\nor make sure you have embedded it correctly into your fat-jar."
                     + "\nThey can be created e.g. with \"maven-shade-plugin\"."
-                    + "\nPlease be aware that \"one-jar\" might now not work well due to classloader issues.";
+                    + "\nPlease be aware that some fat-jar solutions might not work well due to classloader issues.";
             throw new ClassNotFoundException(message, e);
         }
     }
