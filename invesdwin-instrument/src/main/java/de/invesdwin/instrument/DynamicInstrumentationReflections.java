@@ -1,6 +1,7 @@
 package de.invesdwin.instrument;
 
 import java.io.File;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -98,6 +99,15 @@ public final class DynamicInstrumentationReflections {
         } catch (final IllegalAccessException e) {
             org.springframework.util.ReflectionUtils.handleReflectionException(e);
         }
+    }
+
+    public static InputStream getClassInputStream(final Class<?> clazz) throws ClassNotFoundException {
+        final String name = "/" + clazz.getName().replace(".", "/") + ".class";
+        final InputStream classIn = clazz.getResourceAsStream(name);
+        if (classIn == null) {
+            throw new NullPointerException("resource input stream should not be null: " + name);
+        }
+        return classIn;
     }
 
 }

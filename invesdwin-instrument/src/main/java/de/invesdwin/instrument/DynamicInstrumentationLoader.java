@@ -140,20 +140,11 @@ public final class DynamicInstrumentationLoader {
         final JarOutputStream tempJarOut = new JarOutputStream(new FileOutputStream(tempAgentJar), manifest);
         final JarEntry entry = new JarEntry(className.replace(".", "/") + ".class");
         tempJarOut.putNextEntry(entry);
-        final InputStream classIn = getClassInputStream(clazz);
+        final InputStream classIn = DynamicInstrumentationReflections.getClassInputStream(clazz);
         IOUtils.copy(classIn, tempJarOut);
         tempJarOut.closeEntry();
         tempJarOut.close();
         return tempAgentJar;
-    }
-
-    private static InputStream getClassInputStream(final Class<?> clazz) throws ClassNotFoundException {
-        final String name = "/" + clazz.getName().replace(".", "/") + ".class";
-        final InputStream agentClassIn = clazz.getResourceAsStream(name);
-        if (agentClassIn == null) {
-            throw new NullPointerException("resource input stream should not be null: " + name);
-        }
-        return agentClassIn;
     }
 
 }
