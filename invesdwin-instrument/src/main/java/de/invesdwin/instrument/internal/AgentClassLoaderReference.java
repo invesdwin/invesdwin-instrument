@@ -1,8 +1,6 @@
 package de.invesdwin.instrument.internal;
 
-import javax.annotation.concurrent.NotThreadSafe;
-
-@NotThreadSafe
+// @NotThreadSafe
 public final class AgentClassLoaderReference {
 
     private static ClassLoader agentClassLoader;

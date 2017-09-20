@@ -3,9 +3,7 @@ package de.invesdwin.instrument.internal;
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Method;
 
-import javax.annotation.concurrent.Immutable;
-
-@Immutable
+// @Immutable
 public final class DynamicInstrumentationAgent {
 
     private DynamicInstrumentationAgent() {}
