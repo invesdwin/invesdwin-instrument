@@ -2,9 +2,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                              http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>de.invesdwin</groupId>
+	<parent>
+		<groupId>de.invesdwin</groupId>
+		<artifactId>invesdwin-bom</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+		<relativePath /> <!-- lookup parent from repository -->
+	</parent>
 	<artifactId>invesdwin-instrument</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<licenses>
@@ -19,27 +23,12 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<version.compiler>1.6</version.compiler>
 
-		<version.maven-compiler-plugin>3.1</version.maven-compiler-plugin>
-		<version.maven-source-plugin>2.2.1</version.maven-source-plugin>
-		<version.maven-processor-plugin>2.2.4</version.maven-processor-plugin>
+		<version.maven-source-plugin>3.0.1</version.maven-source-plugin>
+		<version.maven-processor-plugin>3.3.2</version.maven-processor-plugin>
 		<version.invesdwin-maven-plugin>1.0.0-SNAPSHOT</version.invesdwin-maven-plugin>
-		<version.maven-jar-plugin>2.3.2</version.maven-jar-plugin>
+		<version.maven-jar-plugin>3.0.2</version.maven-jar-plugin>
 		<version.license-check-maven-plugin>0.5.4-inv</version.license-check-maven-plugin>
-
-		<version.invesdwin-bom>1.0.0-SNAPSHOT</version.invesdwin-bom>
 	</properties>
-
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>de.invesdwin</groupId>
-				<artifactId>invesdwin-bom</artifactId>
-				<version>${version.invesdwin-bom}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 
 	<dependencies>
 		<dependency>
@@ -76,8 +65,18 @@
 		</dependency>
 
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-runner</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -114,20 +113,6 @@
 			</testResource>
 		</testResources>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>${version.maven-compiler-plugin}</version>
-				<configuration>
-					<source>${version.compiler}</source>
-					<target>${version.compiler}</target>
-					<complianceLevel>${version.compiler}</complianceLevel>
-					<encoding>${file.encoding}</encoding>
-					<compilerArgument>-proc:none</compilerArgument>
-					<Xlint>ignore</Xlint>
-					<verbose>false</verbose>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>org.bsc.maven</groupId>
 				<artifactId>maven-processor-plugin</artifactId>
@@ -273,5 +258,5 @@
 			<url>http://invesdwin.de/artifactory/invesdwin-oss-remote</url>
 		</pluginRepository>
 	</pluginRepositories>
-	
+
 </project>
