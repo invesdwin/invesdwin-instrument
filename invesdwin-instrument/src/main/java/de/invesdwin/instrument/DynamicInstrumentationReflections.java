@@ -73,7 +73,7 @@ public final class DynamicInstrumentationReflections {
         method.invoke(systemClassLoader, url);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "restriction" })
     private static void addUrlToAppClassLoaderURLClassPath(final URL url)
             throws NoSuchFieldException, SecurityException {
         final ClassLoader systemClassLoader = getSystemClassLoader();
@@ -100,6 +100,7 @@ public final class DynamicInstrumentationReflections {
         }
     }
 
+    @SuppressWarnings("restriction")
     public static sun.misc.Unsafe getUnsafe() {
         try {
             final Field unsafeField = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
