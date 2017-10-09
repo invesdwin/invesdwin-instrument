@@ -8,9 +8,11 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Stack;
 
 import javax.annotation.concurrent.Immutable;
 
@@ -35,10 +37,13 @@ public final class DynamicInstrumentationReflections {
             org.assertj.core.api.Assertions.assertThat(pathsAddedToSystemClassLoader.add(normalizedPath))
                     .as("Path [%s] has already been added before!", normalizedPath)
                     .isTrue();
-            final Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-            method.setAccessible(true);
             final URL url = new File(normalizedPath).toURI().toURL();
-            method.invoke(getSystemClassLoader(), url);
+            if (isBeforeJava9()) {
+                addUrlToURLClassLoader(url);
+            } else {
+                //we are in java 9
+                addUrlToAppClassLoaderURLClassPath(url);
+            }
         } catch (final NoSuchMethodException e) {
             org.springframework.util.ReflectionUtils.handleReflectionException(e);
         } catch (final SecurityException e) {
@@ -51,6 +56,58 @@ public final class DynamicInstrumentationReflections {
             org.springframework.util.ReflectionUtils.handleReflectionException(e);
         } catch (final InvocationTargetException e) {
             org.springframework.util.ReflectionUtils.handleReflectionException(e);
+        } catch (final NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static boolean isBeforeJava9() {
+        return getSystemClassLoader() instanceof URLClassLoader;
+    }
+
+    private static void addUrlToURLClassLoader(final URL url)
+            throws NoSuchMethodException, MalformedURLException, IllegalAccessException, InvocationTargetException {
+        final ClassLoader systemClassLoader = getSystemClassLoader();
+        final Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
+        method.setAccessible(true);
+        method.invoke(systemClassLoader, url);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void addUrlToAppClassLoaderURLClassPath(final URL url)
+            throws NoSuchFieldException, SecurityException {
+        final ClassLoader systemClassLoader = getSystemClassLoader();
+        //normal way: --add-opens java.base/jdk.internal.loader=ALL-UNNAMED
+        //hacker way: https://javax0.wordpress.com/2017/05/03/hacking-the-integercache-in-java-9/
+        final sun.misc.Unsafe unsafe = getUnsafe();
+        //jdk.internal.loader.ClassLoaders.AppClassLoader.ucp
+        final Field ucpField = systemClassLoader.getClass().getDeclaredField("ucp");
+        final Object ucp = unsafe.getObject(systemClassLoader, unsafe.objectFieldOffset(ucpField));
+
+        //jdk.internal.loader.URLClassPath.addUrl(...)
+        synchronized (ucp) {
+            final Field pathField = ucp.getClass().getDeclaredField("path");
+            final ArrayList<URL> path = (ArrayList<URL>) unsafe.getObject(ucp, unsafe.objectFieldOffset(pathField));
+            final Field urlsField = ucp.getClass().getDeclaredField("urls");
+            final Stack<URL> urls = (Stack<URL>) unsafe.getObject(ucp, unsafe.objectFieldOffset(urlsField));
+            synchronized (urls) {
+                if (url == null || path.contains(url)) {
+                    return;
+                }
+                urls.add(0, url);
+                path.add(url);
+            }
+        }
+    }
+
+    public static sun.misc.Unsafe getUnsafe() {
+        try {
+            final Field unsafeField = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
+            unsafeField.setAccessible(true);
+            final sun.misc.Unsafe unsafe = (sun.misc.Unsafe) unsafeField.get(null);
+            return unsafe;
+        } catch (final Throwable e) {
+            throw new RuntimeException(e);
         }
     }
 

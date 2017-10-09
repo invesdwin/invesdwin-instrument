@@ -32,8 +32,10 @@ public class JdkFilesFinder {
         //add parent directories on windows to get the jdk from the jre folder
         final List<File> potentialOtherJavaHomes = new ArrayList<File>();
         for (final File javaHome : new ArrayList<File>(javaHomes)) {
-            for (final File dir : javaHome.getParentFile().listFiles()) {
-                potentialOtherJavaHomes.add(dir);
+            if (javaHome.getAbsolutePath().contains("jre")) {
+                for (final File dir : javaHome.getParentFile().listFiles()) {
+                    potentialOtherJavaHomes.add(dir);
+                }
             }
         }
         //sort file names descending to have the highest jdk version be searched first
@@ -44,7 +46,7 @@ public class JdkFilesFinder {
             }
         });
         javaHomes.addAll(potentialOtherJavaHomes);
-        //search for special subfolders that might contain the desired files 
+        //search for special subfolders that might contain the desired files
         this.potentialFolders = new LinkedHashSet<File>();
         for (final File javaHome : javaHomes) {
             if (!org.springframework.util.StringUtils.isEmpty(javaHome)) {

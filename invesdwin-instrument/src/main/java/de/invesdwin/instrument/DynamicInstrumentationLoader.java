@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
@@ -15,15 +17,20 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
+import org.zeroturnaround.exec.ProcessExecutor;
+import org.zeroturnaround.exec.stream.slf4j.Slf4jStream;
 
 import de.invesdwin.instrument.internal.AgentClassLoaderReference;
 import de.invesdwin.instrument.internal.DynamicInstrumentationAgent;
+import de.invesdwin.instrument.internal.DynamicInstrumentationLoadAgentMain;
 import de.invesdwin.instrument.internal.JdkFilesFinder;
 
 @ThreadSafe
 public final class DynamicInstrumentationLoader {
 
     private static volatile Throwable threadFailed;
+    private static volatile String toolsJarPath;
+    private static volatile String attachLibPath;
     /**
      * keeping a reference here so it is not garbage collected
      */
@@ -41,7 +48,11 @@ public final class DynamicInstrumentationLoader {
                 TimeUnit.MILLISECONDS.sleep(1);
             }
             if (threadFailed != null) {
-                throw new RuntimeException(threadFailed);
+                final String javaVersion = getJavaVersion();
+                final String javaHome = getJavaHome();
+                throw new RuntimeException("Additional information: javaVersion=" + javaVersion + "; javaHome="
+                        + javaHome + "; toolsJarPath=" + toolsJarPath + "; attachLibPath=" + attachLibPath,
+                        threadFailed);
             }
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -70,11 +81,7 @@ public final class DynamicInstrumentationLoader {
                     @Override
                     public void run() {
                         try {
-                            //use reflection since tools.jar has been added to the classpath dynamically
-                            final Class<?> vmClass = Class.forName("com.sun.tools.attach.VirtualMachine");
-                            final Object vm = vmClass.getMethod("attach", String.class).invoke(null,
-                                    String.valueOf(pid));
-                            vmClass.getMethod("loadAgent", String.class).invoke(vm, tempAgentJar.getAbsolutePath());
+                            loadAgent(tempAgentJar, pid);
                         } catch (final Throwable e) {
                             threadFailed = e;
                             throw new RuntimeException(e);
@@ -85,11 +92,16 @@ public final class DynamicInstrumentationLoader {
                 DynamicInstrumentationReflections.addPathToSystemClassLoader(tempAgentJar);
 
                 final JdkFilesFinder jdkFilesFinder = new JdkFilesFinder();
-                final File toolsJar = jdkFilesFinder.findToolsJar();
-                DynamicInstrumentationReflections.addPathToSystemClassLoader(toolsJar);
 
-                final File attachLib = jdkFilesFinder.findAttachLib();
-                DynamicInstrumentationReflections.addPathToJavaLibraryPath(attachLib.getParentFile());
+                if (DynamicInstrumentationReflections.isBeforeJava9()) {
+                    final File toolsJar = jdkFilesFinder.findToolsJar();
+                    DynamicInstrumentationReflections.addPathToSystemClassLoader(toolsJar);
+                    DynamicInstrumentationLoader.toolsJarPath = toolsJar.getAbsolutePath();
+
+                    final File attachLib = jdkFilesFinder.findAttachLib();
+                    DynamicInstrumentationReflections.addPathToJavaLibraryPath(attachLib.getParentFile());
+                    DynamicInstrumentationLoader.attachLibPath = attachLib.getAbsolutePath();
+                }
 
                 loadAgentThread.start();
             } catch (final Exception e) {
@@ -97,6 +109,42 @@ public final class DynamicInstrumentationLoader {
             }
 
         }
+    }
+
+    private static void loadAgent(final File tempAgentJar, final String pid) throws Exception {
+        if (DynamicInstrumentationReflections.isBeforeJava9()) {
+            DynamicInstrumentationLoadAgentMain.loadAgent(pid, tempAgentJar.getAbsolutePath());
+        } else {
+            //-Djdk.attach.allowAttachSelf https://www.bountysource.com/issues/45231289-self-attach-fails-on-jdk9
+            //workaround this limitation by attaching from a new process
+            final File loadAgentJar = createTempJar(DynamicInstrumentationLoadAgentMain.class, false);
+            final String javaExecutable = getJavaHome() + "/bin/java";
+            final List<String> command = new ArrayList<String>();
+            command.add(javaExecutable);
+            command.add("-classpath");
+            command.add(loadAgentJar.getAbsolutePath()); //tools.jar not needed since java9
+            command.add(DynamicInstrumentationLoadAgentMain.class.getName());
+            command.add(pid);
+            command.add(tempAgentJar.getAbsolutePath());
+            new ProcessExecutor().command(command)
+                    .destroyOnExit()
+                    .exitValueNormal()
+                    .redirectOutput(Slf4jStream.of(DynamicInstrumentationLoader.class).asInfo())
+                    .redirectError(Slf4jStream.of(DynamicInstrumentationLoader.class).asWarn())
+                    .execute();
+        }
+    }
+
+    private static String getJavaHome() {
+        //CHECKSTYLE:OFF
+        return System.getProperty("java.home");
+        //CHECKSTYLE:ON
+    }
+
+    private static String getJavaVersion() {
+        //CHECKSTYLE:OFF
+        return System.getProperty("java.version");
+        //CHECKSTYLE:ON
     }
 
     private static void setAgentClassLoaderReference() throws Exception {
