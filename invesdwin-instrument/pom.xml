@@ -27,7 +27,6 @@
 		<version.maven-processor-plugin>3.3.2</version.maven-processor-plugin>
 		<version.invesdwin-maven-plugin>1.0.0-SNAPSHOT</version.invesdwin-maven-plugin>
 		<version.maven-jar-plugin>3.0.2</version.maven-jar-plugin>
-		<version.license-check-maven-plugin>0.5.4-inv</version.license-check-maven-plugin>
 	</properties>
 
 	<dependencies>
@@ -181,60 +180,7 @@
 					</archive>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.complykit</groupId>
-				<artifactId>license-check-maven-plugin</artifactId>
-				<version>${version.license-check-maven-plugin}</version>
-				<executions>
-					<execution>
-						<phase>verify</phase>
-						<goals>
-							<goal>os-check</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<blacklist>
-						<param>agpl-1.0</param>
-						<param>agpl-2.0</param>
-						<param>agpl-3.0</param>
-						<param>gpl-1.0</param>
-						<param>gpl-2.0</param>
-						<param>gpl-3.0</param>
-					</blacklist>
-				</configuration>
-			</plugin>
 		</plugins>
-		<pluginManagement>
-			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings 
-					only. It has no influence on the Maven build itself. -->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.apache.maven.plugins</groupId>
-										<artifactId>maven-plugin-plugin</artifactId>
-										<versionRange>[3.2,)</versionRange>
-										<goals>
-											<goal>descriptor</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 	</build>
 
 	<distributionManagement>
