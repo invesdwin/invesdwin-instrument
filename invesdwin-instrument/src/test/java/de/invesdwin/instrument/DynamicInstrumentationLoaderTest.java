@@ -2,11 +2,8 @@ package de.invesdwin.instrument;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
-import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
+import org.junit.Test;
 
-@RunWith(JUnitPlatform.class)
 @NotThreadSafe
 public class DynamicInstrumentationLoaderTest {
 
