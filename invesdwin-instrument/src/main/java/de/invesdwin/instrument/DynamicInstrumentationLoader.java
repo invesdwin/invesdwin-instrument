@@ -118,7 +118,7 @@ public final class DynamicInstrumentationLoader {
             //-Djdk.attach.allowAttachSelf https://www.bountysource.com/issues/45231289-self-attach-fails-on-jdk9
             //workaround this limitation by attaching from a new process
             final File loadAgentJar = createTempJar(DynamicInstrumentationLoadAgentMain.class, false);
-            final String javaExecutable = getJavaHome() + File.separator + "bin" + File.separator + "java";;
+            final String javaExecutable = getJavaHome() + File.separator + "bin" + File.separator + "java";
             final List<String> command = new ArrayList<String>();
             command.add(javaExecutable);
             command.add("-classpath");
