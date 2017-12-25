@@ -87,7 +87,9 @@ public final class DynamicInstrumentationLoadAgentMain {
             return "sun.tools.attach.WindowsVirtualMachine";
         }
 
+        //CHECKSTYLE:OFF
         final String osName = System.getProperty("os.name");
+        //CHECKSTYLE:ON
 
         if (osName.startsWith("Linux") || osName.startsWith("LINUX")) {
             return "sun.tools.attach.LinuxVirtualMachine";
@@ -109,7 +111,9 @@ public final class DynamicInstrumentationLoadAgentMain {
     }
 
     private static String newHelpMessageForNonHotSpotVM() {
+        //CHECKSTYLE:OFF
         final String vmName = System.getProperty("java.vm.name");
+        //CHECKSTYLE:ON
         String helpMessage = "To run on " + vmName;
 
         if (vmName.contains("J9")) {
