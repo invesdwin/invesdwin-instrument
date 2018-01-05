@@ -30,7 +30,7 @@ static {
 With [spring-boot](http://projects.spring.io/spring-boot/) you have to ensure that the context in the aspects is updated by importing the one responsible for initializing the load time weaving into the spring-boot configuration:
 ```java
 @SpringBootApplication
-/* Make @Configurable work.
+/* Make @Configurable work via @EnableLoadTimeWeaving.
  * If it does not work, alternatively you can try: 
  * @ImportResource(locations = "classpath:/META-INF/ctx.spring.weaving.xml") 
  */
