@@ -30,7 +30,11 @@ static {
 With [spring-boot](http://projects.spring.io/spring-boot/) you have to ensure that the context in the aspects is updated by importing the one responsible for initializing the load time weaving into the spring-boot configuration:
 ```java
 @SpringBootApplication
-@ImportResource(locations = "classpath:/META-INF/ctx.spring.weaving.xml") //make @Configurable work
+/* Make @Configurable work.
+ * If it does not work, alternatively you can try: 
+ * @ImportResource(locations = "classpath:/META-INF/ctx.spring.weaving.xml") 
+ */
+@EnableLoadTimeWeaving
 public class MySpringBootApplication {
     public static void main(final String[] args) {
         DynamicInstrumentationLoader.waitForInitialized(); //dynamically attach java agent to jvm if not already present
