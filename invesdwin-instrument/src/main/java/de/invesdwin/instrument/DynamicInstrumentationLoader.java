@@ -117,7 +117,8 @@ public final class DynamicInstrumentationLoader {
         } else {
             //-Djdk.attach.allowAttachSelf https://www.bountysource.com/issues/45231289-self-attach-fails-on-jdk9
             //workaround this limitation by attaching from a new process
-            final File loadAgentJar = createTempJar(DynamicInstrumentationLoadAgentMain.class, false);
+            final File loadAgentJar = createTempJar(DynamicInstrumentationLoadAgentMain.class, false,
+                    DynamicInstrumentationReflections.getClassesInPackage("javassist"));
             final String javaExecutable = getJavaHome() + File.separator + "bin" + File.separator + "java";
             final List<String> command = new ArrayList<String>();
             command.add(javaExecutable);
@@ -175,7 +176,8 @@ public final class DynamicInstrumentationLoader {
     /**
      * Creates a new jar that only contains the DynamicInstrumentationAgent class.
      */
-    private static File createTempJar(final Class<?> clazz, final boolean agent) throws Exception {
+    private static File createTempJar(final Class<?> clazz, final boolean agent, final Class<?>... additionalClasses)
+            throws Exception {
         final String className = clazz.getName();
         final File tempAgentJar = new File(DynamicInstrumentationProperties.TEMP_DIRECTORY, className + ".jar");
         final Manifest manifest = new Manifest(clazz.getResourceAsStream("/META-INF/MANIFEST.MF"));
@@ -191,6 +193,17 @@ public final class DynamicInstrumentationLoader {
         final InputStream classIn = DynamicInstrumentationReflections.getClassInputStream(clazz);
         IOUtils.copy(classIn, tempJarOut);
         tempJarOut.closeEntry();
+        if (additionalClasses != null) {
+            for (final Class<?> additionalClazz : additionalClasses) {
+                final String additionalClassName = additionalClazz.getName();
+                final JarEntry additionalEntry = new JarEntry(additionalClassName.replace(".", "/") + ".class");
+                tempJarOut.putNextEntry(additionalEntry);
+                final InputStream additionalClassIn = DynamicInstrumentationReflections
+                        .getClassInputStream(additionalClazz);
+                IOUtils.copy(additionalClassIn, tempJarOut);
+                tempJarOut.closeEntry();
+            }
+        }
         tempJarOut.close();
         return tempAgentJar;
     }

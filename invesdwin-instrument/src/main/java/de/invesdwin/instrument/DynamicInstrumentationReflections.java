@@ -1,6 +1,7 @@
 package de.invesdwin.instrument;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -11,12 +12,17 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.Stack;
+import java.util.regex.Pattern;
 
 import javax.annotation.concurrent.Immutable;
 
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.core.type.filter.RegexPatternTypeFilter;
 
 @Immutable
 public final class DynamicInstrumentationReflections {
@@ -166,6 +172,35 @@ public final class DynamicInstrumentationReflections {
             throw new NullPointerException("resource input stream should not be null: " + name);
         }
         return classIn;
+    }
+
+    /**
+     * @see <a href=
+     *      "https://stackoverflow.com/questions/520328/can-you-find-all-classes-in-a-package-using-reflection/22462785">
+     *      Source</a>
+     */
+    public static Class<?>[] getClassesInPackage(final String packageName) throws ClassNotFoundException, IOException {
+        // create scanner and disable default filters (that is the 'false' argument)
+        final org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider provider = new org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider(
+                false) {
+            @Override
+            protected boolean isCandidateComponent(final AnnotatedBeanDefinition beanDefinition) {
+                //also include interfaces
+                return true;
+            }
+        };
+        provider.addIncludeFilter(new RegexPatternTypeFilter(Pattern.compile(".*")));
+
+        // get matching classes defined in the package
+        final Set<BeanDefinition> classDefinitions = provider.findCandidateComponents(packageName);
+
+        final List<Class<?>> classes = new ArrayList<Class<?>>();
+        // this is how you can load the class type from BeanDefinition instance
+        for (final BeanDefinition bean : classDefinitions) {
+            final Class<?> clazz = Class.forName(bean.getBeanClassName());
+            classes.add(clazz);
+        }
+        return classes.toArray(new Class<?>[classes.size()]);
     }
 
 }
