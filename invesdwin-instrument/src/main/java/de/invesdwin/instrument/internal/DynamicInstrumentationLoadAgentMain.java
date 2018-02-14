@@ -3,12 +3,7 @@ package de.invesdwin.instrument.internal;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
-
-import javassist.util.proxy.MethodHandler;
-import javassist.util.proxy.ProxyFactory;
-import javassist.util.proxy.ProxyObject;
 
 // @Immutable
 public final class DynamicInstrumentationLoadAgentMain {
@@ -43,18 +38,10 @@ public final class DynamicInstrumentationLoadAgentMain {
                 final Constructor<?> vmConstructor = virtualMachineClass.getDeclaredConstructor(attachProviderClass,
                         String.class);
                 vmConstructor.setAccessible(true);
-                final ProxyFactory proxyFactory = new ProxyFactory();
-                proxyFactory.setSuperclass(attachProviderClass);
-                final Class<?> proxyClass = proxyFactory.createClass();
-                final Object attachProvider = proxyClass.newInstance();
-                ((ProxyObject) attachProvider).setHandler(new MethodHandler() {
-                    @Override
-                    public Object invoke(final Object self, final Method thisMethod, final Method proceed,
-                            final Object[] args) throws Throwable {
-                        return null;
-                    }
-                });
-                virtualMachine = vmConstructor.newInstance(attachProvider, pid);
+                final Object dummyAttachProvider = Class.forName("de.invesdwin.instrument.internal.DummyAttachProvider")
+                        .getDeclaredConstructor()
+                        .newInstance();
+                virtualMachine = vmConstructor.newInstance(dummyAttachProvider, pid);
             } else {
                 virtualMachineClass = Class.forName("com.sun.tools.attach.VirtualMachine");
                 virtualMachine = virtualMachineClass.getMethod("attach", String.class).invoke(null, pid);

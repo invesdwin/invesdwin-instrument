@@ -27,6 +27,7 @@
 		<version.maven-processor-plugin>3.3.2</version.maven-processor-plugin>
 		<version.invesdwin-maven-plugin>1.0.1-SNAPSHOT</version.invesdwin-maven-plugin>
 		<version.maven-jar-plugin>3.0.2</version.maven-jar-plugin>
+		<version.maven-jdk-tools-wrapper>0.1</version.maven-jdk-tools-wrapper>
 	</properties>
 
 	<dependencies>
@@ -67,13 +68,15 @@
 			<artifactId>zt-exec</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.javassist</groupId>
-			<artifactId>javassist</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.github.olivergondza</groupId>
+			<artifactId>maven-jdk-tools-wrapper</artifactId>
+			<version>${version.maven-jdk-tools-wrapper}</version>
+			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
