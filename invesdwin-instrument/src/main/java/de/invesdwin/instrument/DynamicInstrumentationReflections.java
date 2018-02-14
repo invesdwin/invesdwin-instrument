@@ -2,6 +2,7 @@ package de.invesdwin.instrument;
 
 import java.io.File;
 import java.io.InputStream;
+import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -17,6 +18,7 @@ import java.util.Stack;
 import javax.annotation.concurrent.Immutable;
 
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
 
 @Immutable
 public final class DynamicInstrumentationReflections {
@@ -166,6 +168,20 @@ public final class DynamicInstrumentationReflections {
             throw new NullPointerException("resource input stream should not be null: " + name);
         }
         return classIn;
+    }
+
+    public static Instrumentation getInstrumentation() {
+        try {
+            final Method getInstrumentationMethod = InstrumentationLoadTimeWeaver.class
+                    .getDeclaredMethod("getInstrumentation");
+            org.springframework.util.ReflectionUtils.makeAccessible(getInstrumentationMethod);
+            return (Instrumentation) org.springframework.util.ReflectionUtils.invokeMethod(getInstrumentationMethod,
+                    null);
+        } catch (final NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        } catch (final SecurityException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
