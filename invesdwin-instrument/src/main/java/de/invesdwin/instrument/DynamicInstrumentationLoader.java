@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -119,10 +121,19 @@ public final class DynamicInstrumentationLoader {
             //workaround this limitation by attaching from a new process
             final File loadAgentJar = createTempJar(DynamicInstrumentationLoadAgentMain.class, false);
             final String javaExecutable = getJavaHome() + File.separator + "bin" + File.separator + "java";
+
+            final URLClassLoader classLoader = (URLClassLoader) Thread.currentThread().getContextClassLoader();
+            final StringBuilder classpath = new StringBuilder();
+            classpath.append(loadAgentJar.getAbsolutePath()); //tools.jar not needed since java9
+            for (final URL url : classLoader.getURLs()) {
+                classpath.append(File.pathSeparator);
+                classpath.append(url.toString());
+            }
+
             final List<String> command = new ArrayList<String>();
             command.add(javaExecutable);
             command.add("-classpath");
-            command.add(loadAgentJar.getAbsolutePath()); //tools.jar not needed since java9
+            command.add(classpath.toString());
             command.add(DynamicInstrumentationLoadAgentMain.class.getName());
             command.add(pid);
             command.add(tempAgentJar.getAbsolutePath());
