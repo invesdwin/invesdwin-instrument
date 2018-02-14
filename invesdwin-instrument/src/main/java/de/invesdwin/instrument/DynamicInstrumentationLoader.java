@@ -21,7 +21,6 @@ import org.zeroturnaround.exec.ProcessExecutor;
 import org.zeroturnaround.exec.stream.slf4j.Slf4jStream;
 
 import de.invesdwin.instrument.internal.AgentClassLoaderReference;
-import de.invesdwin.instrument.internal.DummyAttachProvider;
 import de.invesdwin.instrument.internal.DynamicInstrumentationAgent;
 import de.invesdwin.instrument.internal.DynamicInstrumentationLoadAgentMain;
 import de.invesdwin.instrument.internal.JdkFilesFinder;
@@ -119,7 +118,7 @@ public final class DynamicInstrumentationLoader {
             //-Djdk.attach.allowAttachSelf https://www.bountysource.com/issues/45231289-self-attach-fails-on-jdk9
             //workaround this limitation by attaching from a new process
             final File loadAgentJar = createTempJar(DynamicInstrumentationLoadAgentMain.class, false,
-                    DummyAttachProvider.class);
+                    de.invesdwin.instrument.internal.DummyAttachProvider.class);
             final String javaExecutable = getJavaHome() + File.separator + "bin" + File.separator + "java";
             final List<String> command = new ArrayList<String>();
             command.add(javaExecutable);
