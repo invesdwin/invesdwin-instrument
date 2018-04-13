@@ -18,7 +18,7 @@ import java.util.Stack;
 import javax.annotation.concurrent.Immutable;
 
 import org.apache.commons.io.FilenameUtils;
-import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
+import org.springframework.instrument.InstrumentationSavingAgent;
 
 @Immutable
 public final class DynamicInstrumentationReflections {
@@ -171,17 +171,7 @@ public final class DynamicInstrumentationReflections {
     }
 
     public static Instrumentation getInstrumentation() {
-        try {
-            final Method getInstrumentationMethod = InstrumentationLoadTimeWeaver.class
-                    .getDeclaredMethod("getInstrumentation");
-            org.springframework.util.ReflectionUtils.makeAccessible(getInstrumentationMethod);
-            return (Instrumentation) org.springframework.util.ReflectionUtils.invokeMethod(getInstrumentationMethod,
-                    null);
-        } catch (final NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        } catch (final SecurityException e) {
-            throw new RuntimeException(e);
-        }
+        return InstrumentationSavingAgent.getInstrumentation();
     }
 
 }
