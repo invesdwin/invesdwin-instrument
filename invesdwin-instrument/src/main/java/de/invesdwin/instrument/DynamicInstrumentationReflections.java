@@ -9,12 +9,12 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
-import java.util.ArrayDeque;
 
 import javax.annotation.concurrent.Immutable;
 
@@ -68,10 +68,6 @@ public final class DynamicInstrumentationReflections {
         return getSystemClassLoader() instanceof URLClassLoader;
     }
 
-    public static boolean isAfterJava10() {
-        return System.getProperty("java.version").startsWith("11");
-    }
-
     private static void addUrlToURLClassLoader(final URL url)
             throws NoSuchMethodException, MalformedURLException, IllegalAccessException, InvocationTargetException {
         final ClassLoader systemClassLoader = getSystemClassLoader();
@@ -96,9 +92,11 @@ public final class DynamicInstrumentationReflections {
             final Field pathField = ucp.getClass().getDeclaredField("path");
             final ArrayList<URL> path = (ArrayList<URL>) unsafe.getObject(ucp, unsafe.objectFieldOffset(pathField));
 
-            if (isAfterJava10()) {
+            try {
+                //java 11 and up
                 final Field urlsField = ucp.getClass().getDeclaredField("unopenedUrls");
-                final ArrayDeque<URL> urls = (ArrayDeque<URL>) unsafe.getObject(ucp, unsafe.objectFieldOffset(urlsField));
+                final ArrayDeque<URL> urls = (ArrayDeque<URL>) unsafe.getObject(ucp,
+                        unsafe.objectFieldOffset(urlsField));
                 synchronized (urls) {
                     if (url == null || path.contains(url)) {
                         return;
@@ -106,7 +104,8 @@ public final class DynamicInstrumentationReflections {
                     urls.addFirst(url);
                     path.add(url);
                 }
-            } else {
+            } catch (final NoSuchFieldError e) {
+                //java 9 and 10
                 final Field urlsField = ucp.getClass().getDeclaredField("urls");
                 final Stack<URL> urls = (Stack<URL>) unsafe.getObject(ucp, unsafe.objectFieldOffset(urlsField));
                 synchronized (urls) {
