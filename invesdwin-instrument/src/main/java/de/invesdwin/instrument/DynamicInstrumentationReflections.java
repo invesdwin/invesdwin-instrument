@@ -28,6 +28,32 @@ public final class DynamicInstrumentationReflections {
 
     private DynamicInstrumentationReflections() {}
 
+    @SuppressWarnings({ "restriction", "unchecked" })
+    public static URL[] getURLs(final ClassLoader classLoader) {
+        if (classLoader instanceof URLClassLoader) {
+            return ((URLClassLoader) classLoader).getURLs();
+        }
+
+        // jdk9 or above
+        try {
+            //normal way: --add-opens java.base/jdk.internal.loader=ALL-UNNAMED
+            //hacker way: https://javax0.wordpress.com/2017/05/03/hacking-the-integercache-in-java-9/
+            final sun.misc.Unsafe unsafe = getUnsafe();
+            //jdk.internal.loader.ClassLoaders.AppClassLoader.ucp
+            final Field ucpField = classLoader.getClass().getDeclaredField("ucp");
+            final Object ucp = unsafe.getObject(classLoader, unsafe.objectFieldOffset(ucpField));
+
+            //jdk.internal.loader.URLClassPath.addUrl(...)
+            synchronized (ucp) {
+                final Field pathField = ucp.getClass().getDeclaredField("path");
+                final ArrayList<URL> path = (ArrayList<URL>) unsafe.getObject(ucp, unsafe.objectFieldOffset(pathField));
+                return path.toArray(new URL[path.size()]);
+            }
+        } catch (final NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
      * http://stackoverflow.com/questions/1010919/adding-files-to-java-classpath-at-runtime
      */
