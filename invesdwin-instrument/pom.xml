@@ -151,7 +151,7 @@
 			<plugin>
 				<groupId>de.invesdwin</groupId>
 				<artifactId>invesdwin-maven-plugin</artifactId>
-				<version>1.0.3-SNAPSHOT</version>
+				<version>${version.invesdwin-maven-plugin}</version>
 				<executions>
 					<execution>
 						<goals>
