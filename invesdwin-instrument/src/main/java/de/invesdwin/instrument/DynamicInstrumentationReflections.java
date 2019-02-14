@@ -44,7 +44,7 @@ public final class DynamicInstrumentationReflections {
             if (isBeforeJava9()) {
                 addUrlToURLClassLoader(url);
             } else {
-                //we are in java 9
+                //we are in java 9 or above
                 addUrlToAppClassLoaderURLClassPath(url);
             }
         } catch (final NoSuchMethodException e) {
