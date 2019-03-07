@@ -194,7 +194,10 @@ public final class DynamicInstrumentationReflections {
             fieldSysPath.setAccessible(true);
             fieldSysPath.set(ClassLoader.class, null);
         } catch (final NoSuchFieldException e) {
-            org.springframework.util.ReflectionUtils.handleReflectionException(e);
+            /*
+             * ignore, happens on ibm-jdk-8 and adoptopenjdk-8-openj9 but has no influence since there is no cached
+             * field that needs a reset
+             */
         } catch (final SecurityException e) {
             org.springframework.util.ReflectionUtils.handleReflectionException(e);
         } catch (final IllegalArgumentException e) {
