@@ -27,6 +27,8 @@
 		<version.invesdwin-maven-plugin>1.0.3-SNAPSHOT</version.invesdwin-maven-plugin>
 		<version.maven-jar-plugin>3.0.2</version.maven-jar-plugin>
 		<version.maven-jdk-tools-wrapper>0.1</version.maven-jdk-tools-wrapper>
+		
+		<maven.javadoc.skip>true</maven.javadoc.skip>
 	</properties>
 
 	<dependencies>
