@@ -3,11 +3,11 @@
 	<parent>
 		<groupId>de.invesdwin</groupId>
 		<artifactId>invesdwin-bom</artifactId>
-		<version>1.0.3-SNAPSHOT</version>
+		<version>1.0.3</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<artifactId>invesdwin-instrument</artifactId>
-	<version>1.0.3-SNAPSHOT</version>
+	<version>1.0.3</version>
 	<packaging>jar</packaging>
 
 	<licenses>
@@ -153,7 +153,7 @@
 			<plugin>
 				<groupId>de.invesdwin</groupId>
 				<artifactId>invesdwin-maven-plugin</artifactId>
-				<version>${version.invesdwin-maven-plugin}</version>
+				<version>1.0.3</version>
 				<executions>
 					<execution>
 						<goals>
@@ -215,7 +215,7 @@
 	<scm>
 		<url>https://github.com/subes/invesdwin-instrument</url>
 		<connection>scm:git:https://github.com/subes/invesdwin-instrument.git</connection>
-		<tag>HEAD</tag>
+		<tag>invesdwin-instrument-1.0.3</tag>
 	</scm>
 
 </project>
