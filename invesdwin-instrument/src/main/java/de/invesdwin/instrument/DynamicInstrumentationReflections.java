@@ -130,7 +130,7 @@ public final class DynamicInstrumentationReflections {
                     urls.addFirst(url);
                     path.add(url);
                 }
-            } catch (final NoSuchFieldError e) {
+            } catch (final NoSuchFieldException e) {
                 //java 9 and 10
                 final Field urlsField = ucp.getClass().getDeclaredField("urls");
                 final Stack<URL> urls = (Stack<URL>) unsafe.getObject(ucp, unsafe.objectFieldOffset(urlsField));
