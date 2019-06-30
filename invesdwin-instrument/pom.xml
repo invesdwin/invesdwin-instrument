@@ -215,5 +215,10 @@
 		<connection>scm:git:https://github.com/subes/invesdwin-instrument.git</connection>
 		<tag>HEAD</tag>
 	</scm>
+	
+	<ciManagement>
+		<system>jenkins</system>
+		<url>https://invesdwin.de/jenkins/job/dgr-deploy-invesdwin-instrument/</url>
+	</ciManagement>
 
 </project>
