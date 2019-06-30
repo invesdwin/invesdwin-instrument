@@ -28,7 +28,7 @@
         <dependency>
         	<groupId>de.invesdwin</groupId>
         	<artifactId>invesdwin-instrument</artifactId>
-        	<version>1.0.4</version>
+        	<version>1.0.5-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>
