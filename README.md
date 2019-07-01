@@ -14,7 +14,7 @@ Dependency declaration:
 <dependency>
 	<groupId>de.invesdwin</groupId>
 	<artifactId>invesdwin-instrument</artifactId>
-	<version>1.0.4</version><!---version.invesdwin-instrument-->
+	<version>1.0.5</version><!---version.invesdwin-instrument-->
 </dependency>
 ```
 
