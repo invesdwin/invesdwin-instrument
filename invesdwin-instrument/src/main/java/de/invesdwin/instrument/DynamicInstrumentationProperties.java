@@ -6,8 +6,6 @@ import java.lang.management.ManagementFactory;
 
 import javax.annotation.concurrent.Immutable;
 
-import org.apache.commons.io.FileUtils;
-
 @Immutable
 public final class DynamicInstrumentationProperties {
 
@@ -28,14 +26,14 @@ public final class DynamicInstrumentationProperties {
     public static File newTempDirectory(final File baseDirectory) {
         final File tempDir = findEmptyTempDir(baseDirectory);
         try {
-            FileUtils.forceMkdir(tempDir);
+            org.apache.commons.io.FileUtils.forceMkdir(tempDir);
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
-                FileUtils.deleteQuietly(tempDir);
+                org.apache.commons.io.FileUtils.deleteQuietly(tempDir);
             }
         });
         return tempDir;
@@ -44,7 +42,7 @@ public final class DynamicInstrumentationProperties {
     private static File findEmptyTempDir(final File baseDirectory) {
         File tempDir = new File(baseDirectory, ManagementFactory.getRuntimeMXBean().getName());
         int retry = 0;
-        while (tempDir.exists() && !FileUtils.deleteQuietly(tempDir)) {
+        while (tempDir.exists() && !org.apache.commons.io.FileUtils.deleteQuietly(tempDir)) {
             //no permission to delete folder (maybe different user had this pid before), choose a different one
             tempDir = new File(tempDir.getAbsolutePath() + "_" + retry);
             retry++;
