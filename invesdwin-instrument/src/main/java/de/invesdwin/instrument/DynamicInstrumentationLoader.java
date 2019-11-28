@@ -122,7 +122,13 @@ public final class DynamicInstrumentationLoader {
             final String javaExecutable = getJavaHome() + File.separator + "bin" + File.separator + "java";
             final List<String> command = new ArrayList<String>();
             command.add(javaExecutable);
-            command.add("-XX:+SuppressFatalErrorMessage"); //prevent creation of hs_err files
+
+            //prevent creation of hs_err files in local dir
+            command.add("-XX:+SuppressFatalErrorMessage");
+            final File errorFile = new File(DynamicInstrumentationProperties.TEMP_DIRECTORY,
+                    DynamicInstrumentationLoader.class.getSimpleName() + "_hs_err.log");
+            command.add("-XX:ErrorFile=" + errorFile.getAbsolutePath());
+
             command.add("-classpath");
             command.add(loadAgentJar.getAbsolutePath()); //tools.jar not needed since java9
             command.add(DynamicInstrumentationLoadAgentMain.class.getName());
