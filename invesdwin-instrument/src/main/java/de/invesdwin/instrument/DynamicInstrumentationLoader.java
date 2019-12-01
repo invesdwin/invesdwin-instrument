@@ -125,8 +125,8 @@ public final class DynamicInstrumentationLoader {
 
             //prevent creation of hs_err files in local dir
             command.add("-XX:+SuppressFatalErrorMessage");
-            final File errorFile = new File(DynamicInstrumentationProperties.TEMP_DIRECTORY,
-                    DynamicInstrumentationLoader.class.getSimpleName() + "_hs_err.log");
+            final File errorFile = new File(DynamicInstrumentationProperties.TEMP_DIRECTORY + "_"
+                    + DynamicInstrumentationLoader.class.getSimpleName() + "_hs_err.log");
             command.add("-XX:ErrorFile=" + errorFile.getAbsolutePath());
 
             command.add("-classpath");
