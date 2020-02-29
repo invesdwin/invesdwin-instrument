@@ -26,7 +26,8 @@ public final class DynamicInstrumentationReflections {
 
     private static Set<String> pathsAddedToSystemClassLoader = Collections.synchronizedSet(new HashSet<String>());
 
-    private DynamicInstrumentationReflections() {}
+    private DynamicInstrumentationReflections() {
+    }
 
     @SuppressWarnings({ "restriction", "unchecked" })
     public static URL[] getURLs(final ClassLoader classLoader) {
@@ -203,6 +204,21 @@ public final class DynamicInstrumentationReflections {
         } catch (final IllegalArgumentException e) {
             org.springframework.util.ReflectionUtils.handleReflectionException(e);
         } catch (final IllegalAccessException e) {
+            org.springframework.util.ReflectionUtils.handleReflectionException(e);
+        }
+        try {
+            final Method methodInitLibraryPaths = ClassLoader.class.getDeclaredMethod("initLibraryPaths");
+            methodInitLibraryPaths.setAccessible(true);
+            methodInitLibraryPaths.invoke(ClassLoader.class);
+        } catch (final NoSuchMethodException e) {
+            //ignore, this might happen on older JVMs
+        } catch (final SecurityException e) {
+            org.springframework.util.ReflectionUtils.handleReflectionException(e);
+        } catch (final IllegalAccessException e) {
+            org.springframework.util.ReflectionUtils.handleReflectionException(e);
+        } catch (final IllegalArgumentException e) {
+            org.springframework.util.ReflectionUtils.handleReflectionException(e);
+        } catch (final InvocationTargetException e) {
             org.springframework.util.ReflectionUtils.handleReflectionException(e);
         }
     }
