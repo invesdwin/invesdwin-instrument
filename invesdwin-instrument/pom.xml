@@ -7,7 +7,7 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<artifactId>invesdwin-instrument</artifactId>
-	<version>1.0.9</version>
+	<version>1.0.10-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<licenses>
@@ -219,7 +219,7 @@
 	<scm>
 		<url>https://github.com/subes/invesdwin-instrument</url>
 		<connection>scm:git:https://github.com/subes/invesdwin-instrument.git</connection>
-		<tag>invesdwin-instrument-1.0.9</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<ciManagement>
