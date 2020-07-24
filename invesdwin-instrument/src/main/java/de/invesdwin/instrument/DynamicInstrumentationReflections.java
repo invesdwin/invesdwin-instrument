@@ -64,9 +64,9 @@ public final class DynamicInstrumentationReflections {
         }
         try {
             final String normalizedPath = FilenameUtils.normalize(dirOrJar.getAbsolutePath());
-            org.assertj.core.api.Assertions.assertThat(pathsAddedToSystemClassLoader.add(normalizedPath))
-                    .as("Path [%s] has already been added before!", normalizedPath)
-                    .isTrue();
+            if (!pathsAddedToSystemClassLoader.add(normalizedPath)) {
+                throw new IllegalStateException("Path [" + normalizedPath + "] has already been added before!");
+            }
             final URL url = new File(normalizedPath).toURI().toURL();
             if (isBeforeJava9()) {
                 addUrlToURLClassLoader(url);

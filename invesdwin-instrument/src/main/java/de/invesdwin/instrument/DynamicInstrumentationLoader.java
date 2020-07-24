@@ -36,7 +36,8 @@ public final class DynamicInstrumentationLoader {
      */
     private static GenericXmlApplicationContext ltwCtx;
 
-    private DynamicInstrumentationLoader() {}
+    private DynamicInstrumentationLoader() {
+    }
 
     public static boolean isInitialized() {
         return InstrumentationLoadTimeWeaver.isInstrumentationAvailable();
@@ -60,7 +61,9 @@ public final class DynamicInstrumentationLoader {
     }
 
     public static synchronized GenericXmlApplicationContext initLoadTimeWeavingContext() {
-        org.assertj.core.api.Assertions.assertThat(isInitialized()).isTrue();
+        if (!isInitialized()) {
+            throw new IllegalStateException("Should be initialized");
+        }
         if (ltwCtx == null) {
             final GenericXmlApplicationContext ctx = new GenericXmlApplicationContext();
             ctx.load(new ClassPathResource("/META-INF/ctx.spring.weaving.xml"));

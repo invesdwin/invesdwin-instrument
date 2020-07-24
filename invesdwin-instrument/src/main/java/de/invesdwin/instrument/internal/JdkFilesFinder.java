@@ -80,10 +80,10 @@ public class JdkFilesFinder {
     }
 
     private void assertFileFound(final File toolsJar, final Object potentialFileNames) {
-        org.assertj.core.api.Assertions.assertThat(toolsJar)
-                .as("No %s found in %s. Please make sure a JDK is installed and JAVA_HOME points there.",
-                        potentialFileNames, potentialFolders)
-                .exists();
+        if (!toolsJar.exists()) {
+            throw new IllegalStateException("No " + potentialFileNames + " found in " + potentialFolders
+                    + ". Please make sure a JDK is installed and JAVA_HOME points there.");
+        }
     }
 
     public File findAttachLib() {
