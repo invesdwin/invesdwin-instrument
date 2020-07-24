@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>de.invesdwin</groupId>
 		<artifactId>invesdwin-bom</artifactId>
-		<version>1.0.13</version>
+		<version>1.0.14-SNAPSHOT</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<artifactId>invesdwin-instrument</artifactId>
@@ -24,7 +24,7 @@
 
 		<version.maven-source-plugin>3.0.1</version.maven-source-plugin>
 		<version.maven-processor-plugin>3.3.2</version.maven-processor-plugin>
-		<project.version.invesdwin-maven-plugin>1.0.9</project.version.invesdwin-maven-plugin>
+		<project.version.invesdwin-maven-plugin>1.0.10-SNAPSHOT</project.version.invesdwin-maven-plugin>
 		<version.maven-jar-plugin>3.0.2</version.maven-jar-plugin>
 		<version.maven-jdk-tools-wrapper>0.1</version.maven-jdk-tools-wrapper>
 	</properties>
