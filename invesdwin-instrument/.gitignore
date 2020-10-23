@@ -17,7 +17,7 @@
 /.attach_pid*
 /.DS_Store
 /.idea
-/*.iml
+/**/*.iml
 /.sessions
 /**/.~lock.*
 /.pydevproject
