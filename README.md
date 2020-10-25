@@ -6,7 +6,7 @@ This is an instrumentation java agent that is able to load itself into the runni
 
 Releases and snapshots are deployed to this maven repository:
 ```
-https://invesdwin.de/repo/invesdwin-oss-remote
+https://invesdwin.de/repo/invesdwin-oss-remote/
 ```
 
 Dependency declaration:
