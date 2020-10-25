@@ -192,13 +192,13 @@
 
 	<distributionManagement>
 		<repository>
-			<id>central</id>
-			<name>invesdwin.de-releases</name>
+			<id>invesdwin-oss</id>
+			<name>invesdwin-oss</name>
 			<url>https://invesdwin.de/repo/invesdwin-oss</url>
 		</repository>
 		<snapshotRepository>
-			<id>snapshots</id>
-			<name>invesdwin.de-snapshots</name>
+			<id>invesdwin-oss</id>
+			<name>invesdwin-oss</name>
 			<url>https://invesdwin.de/repo/invesdwin-oss</url>
 		</snapshotRepository>
 	</distributionManagement>
