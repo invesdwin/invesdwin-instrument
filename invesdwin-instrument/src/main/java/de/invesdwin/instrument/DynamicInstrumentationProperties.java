@@ -13,6 +13,12 @@ public final class DynamicInstrumentationProperties {
      * Process specific temp dir that gets cleaned on exit.
      */
     public static final File TEMP_DIRECTORY;
+    private static Runnable deleteTempDirectoryRunner = new Runnable() {
+        @Override
+        public void run() {
+            org.apache.commons.io.FileUtils.deleteQuietly(TEMP_DIRECTORY);
+        }
+    };
 
     static {
         //CHECKSTYLE:OFF
@@ -21,7 +27,8 @@ public final class DynamicInstrumentationProperties {
         TEMP_DIRECTORY = newTempDirectory(new File(systemTempDir));
     }
 
-    private DynamicInstrumentationProperties() {}
+    private DynamicInstrumentationProperties() {
+    }
 
     public static File newTempDirectory(final File baseDirectory) {
         final File tempDir = findEmptyTempDir(baseDirectory);
@@ -33,10 +40,17 @@ public final class DynamicInstrumentationProperties {
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
-                org.apache.commons.io.FileUtils.deleteQuietly(tempDir);
+                deleteTempDirectoryRunner.run();
             }
         });
         return tempDir;
+    }
+
+    public static void setDeleteTempDirectoryRunner(final Runnable deleteTempDirectoryRunner) {
+        if (deleteTempDirectoryRunner == null) {
+            throw new NullPointerException();
+        }
+        DynamicInstrumentationProperties.deleteTempDirectoryRunner = deleteTempDirectoryRunner;
     }
 
     private static File findEmptyTempDir(final File baseDirectory) {
