@@ -219,8 +219,8 @@
 	</pluginRepositories>
 
 	<scm>
-		<url>https://github.com/subes/invesdwin-instrument</url>
-		<connection>scm:git:https://github.com/subes/invesdwin-instrument.git</connection>
+		<url>https://github.com/invesdwin/invesdwin-instrument</url>
+		<connection>scm:git:https://github.com/invesdwin/invesdwin-instrument.git</connection>
 		<tag>HEAD</tag>
 	</scm>
 
