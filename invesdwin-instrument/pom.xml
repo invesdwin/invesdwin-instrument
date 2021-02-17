@@ -141,6 +141,17 @@
 							<failOnError>false</failOnError>
 						</configuration>
 					</execution>
+					<execution>
+						<id>process-test</id>
+						<goals>
+							<goal>process-test</goal>
+						</goals>
+						<phase>generate-test-sources</phase>
+						<configuration>
+							<outputDirectory>${project.build.directory}/generated-test-sources/apt</outputDirectory>
+							<failOnError>false</failOnError>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 			<plugin>
