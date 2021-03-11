@@ -18,7 +18,7 @@ Dependency declaration:
 </dependency>
 ```
 
-There is no plan to publish artifacts to maven central, see answer [here](https://github.com/invesdwin/invesdwin-instrument/issues/17#issuecomment-728772422).
+There is no plan to publish artifacts to maven central, see answer [here](https://github.com/invesdwin/invesdwin-instrument/issues/17#issuecomment-728772422) for alternatives.
 
 ## Usage
 
