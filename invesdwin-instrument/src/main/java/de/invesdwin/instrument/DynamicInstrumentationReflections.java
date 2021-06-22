@@ -41,7 +41,7 @@ public final class DynamicInstrumentationReflections {
             //hacker way: https://javax0.wordpress.com/2017/05/03/hacking-the-integercache-in-java-9/
             final sun.misc.Unsafe unsafe = getUnsafe();
             //jdk.internal.loader.ClassLoaders.AppClassLoader.ucp
-            final Field ucpField = classLoader.getClass().getDeclaredField("ucp");
+            final Field ucpField = getField(classLoader.getClass(), "ucp");
             final Object ucp = unsafe.getObject(classLoader, unsafe.objectFieldOffset(ucpField));
 
             //jdk.internal.loader.URLClassPath.addUrl(...)
@@ -103,6 +103,22 @@ public final class DynamicInstrumentationReflections {
         method.invoke(systemClassLoader, url);
     }
 
+    private static Field getField(final Class<?> startClazz, final String fieldName) throws NoSuchFieldException {
+        Field field = null;
+        Class<?> clazz = startClazz;
+        do {
+            try {
+                field = clazz.getDeclaredField(fieldName);
+            } catch (final NoSuchFieldException e) {
+                clazz = clazz.getSuperclass();
+                if (clazz == null) {
+                    throw e;
+                }
+            }
+        } while( field == null);
+        return field;
+    }
+
     @SuppressWarnings({ "unchecked", "restriction" })
     private static void addUrlToAppClassLoaderURLClassPath(final URL url)
             throws NoSuchFieldException, SecurityException {
@@ -111,7 +127,7 @@ public final class DynamicInstrumentationReflections {
         //hacker way: https://javax0.wordpress.com/2017/05/03/hacking-the-integercache-in-java-9/
         final sun.misc.Unsafe unsafe = getUnsafe();
         //jdk.internal.loader.ClassLoaders.AppClassLoader.ucp
-        final Field ucpField = systemClassLoader.getClass().getDeclaredField("ucp");
+        final Field ucpField = getField(systemClassLoader.getClass(), "ucp");
         final Object ucp = unsafe.getObject(systemClassLoader, unsafe.objectFieldOffset(ucpField));
 
         //jdk.internal.loader.URLClassPath.addUrl(...)
