@@ -30,7 +30,7 @@
 		<dependency>
 			<groupId>de.invesdwin</groupId>
 			<artifactId>invesdwin-instrument</artifactId>
-			<version>1.0.10-SNAPSHOT</version>
+			<version>1.0.10</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
