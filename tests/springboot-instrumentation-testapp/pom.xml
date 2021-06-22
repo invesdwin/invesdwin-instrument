@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.3.1.RELEASE</version>
+		<version>2.5.1</version>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
@@ -14,7 +14,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<properties>
 		<start-class>de.invesdwin.springboot.instrumentation.testapp.Main</start-class>
-		<version.spring-boot-maven-plugin>2.3.1.RELEASE</version.spring-boot-maven-plugin>
+		<version.spring-boot-maven-plugin>2.5.1</version.spring-boot-maven-plugin>
 	</properties>
 
 	<build>
