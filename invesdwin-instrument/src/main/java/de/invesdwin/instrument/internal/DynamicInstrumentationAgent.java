@@ -6,10 +6,15 @@ import java.lang.reflect.Method;
 // @Immutable
 public final class DynamicInstrumentationAgent {
 
-    private DynamicInstrumentationAgent() {}
+    private DynamicInstrumentationAgent() {
+    }
 
     public static void premain(final String args, final Instrumentation inst) throws Exception {
-        final ClassLoader agentClassLoader = AgentClassLoaderReference.getAgentClassLoader();
+        ClassLoader agentClassLoader = AgentClassLoaderReference.getAgentClassLoader();
+        if (agentClassLoader == null) {
+            //fallback to contextClassLoader, don't use external dependencies
+            agentClassLoader = Thread.currentThread().getContextClassLoader();
+        }
         final Class<?> agentInstrumentationInitializer = agentClassLoader.loadClass(
                 DynamicInstrumentationAgent.class.getPackage().getName() + ".AgentInstrumentationInitializer");
         final Method initializeMethod = agentInstrumentationInitializer.getDeclaredMethod("initialize", String.class,
