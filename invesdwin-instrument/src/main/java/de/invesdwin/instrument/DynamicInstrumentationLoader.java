@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
@@ -76,15 +78,16 @@ public final class DynamicInstrumentationLoader {
     static {
         if (!isInitialized()) {
             try {
-                final File tempAgentJar = createTempAgentJar();
-                setAgentClassLoaderReference();
+                final String uuid = UUID.randomUUID().toString();
+                final File tempAgentJar = createTempAgentJar(uuid);
+                setAgentClassLoaderReference(uuid);
                 final String pid = DynamicInstrumentationProperties.getProcessId();
                 final Thread loadAgentThread = new Thread() {
 
                     @Override
                     public void run() {
                         try {
-                            loadAgent(tempAgentJar, pid);
+                            loadAgent(tempAgentJar, pid, uuid);
                         } catch (final Throwable e) {
                             threadFailed = e;
                             throw new RuntimeException(e);
@@ -114,13 +117,13 @@ public final class DynamicInstrumentationLoader {
         }
     }
 
-    private static void loadAgent(final File tempAgentJar, final String pid) throws Exception {
+    private static void loadAgent(final File tempAgentJar, final String pid, final String uuid) throws Exception {
         if (DynamicInstrumentationReflections.isBeforeJava9()) {
             DynamicInstrumentationLoadAgentMain.loadAgent(pid, tempAgentJar.getAbsolutePath());
         } else {
             //-Djdk.attach.allowAttachSelf https://www.bountysource.com/issues/45231289-self-attach-fails-on-jdk9
             //workaround this limitation by attaching from a new process
-            final File loadAgentJar = createTempJar(DynamicInstrumentationLoadAgentMain.class, false,
+            final File loadAgentJar = createTempJar(DynamicInstrumentationLoadAgentMain.class, uuid, false,
                     de.invesdwin.instrument.internal.DummyAttachProvider.class);
             final String javaExecutable = getJavaHome() + File.separator + "bin" + File.separator + "java";
             final List<String> command = new ArrayList<String>();
@@ -151,21 +154,21 @@ public final class DynamicInstrumentationLoader {
         //CHECKSTYLE:ON
     }
 
-    private static void setAgentClassLoaderReference() throws Exception {
+    private static void setAgentClassLoaderReference(final String uuid) throws Exception {
         final Class<AgentClassLoaderReference> agentClassLoaderReferenceClass = AgentClassLoaderReference.class;
-        final File tempAgentClassLoaderJar = createTempJar(agentClassLoaderReferenceClass, false);
+        final File tempAgentClassLoaderJar = createTempJar(agentClassLoaderReferenceClass, uuid, false);
         DynamicInstrumentationReflections.addPathToSystemClassLoader(tempAgentClassLoaderJar);
         final ClassLoader systemClassLoader = DynamicInstrumentationReflections.getSystemClassLoader();
         final Class<?> systemAgentClassLoaderReferenceClass = systemClassLoader
                 .loadClass(agentClassLoaderReferenceClass.getName());
         final Method setAgentClassLoaderMethod = systemAgentClassLoaderReferenceClass
-                .getDeclaredMethod("setAgentClassLoader", ClassLoader.class);
-        setAgentClassLoaderMethod.invoke(null, DynamicInstrumentationReflections.getContextClassLoader());
+                .getDeclaredMethod("setAgentClassLoader", String.class, ClassLoader.class);
+        setAgentClassLoaderMethod.invoke(null, uuid, DynamicInstrumentationReflections.getContextClassLoader());
     }
 
-    private static File createTempAgentJar() throws ClassNotFoundException {
+    private static File createTempAgentJar(final String uuid) throws ClassNotFoundException {
         try {
-            return createTempJar(DynamicInstrumentationAgent.class, true);
+            return createTempJar(DynamicInstrumentationAgent.class, uuid, true);
         } catch (final Throwable e) {
             final String message = "Unable to find class [de.invesdwin.instrument.internal.DynamicInstrumentationAgent] in classpath."
                     + "\nPlease make sure you have added invesdwin-instrument.jar to your classpath properly,"
@@ -179,10 +182,16 @@ public final class DynamicInstrumentationLoader {
     /**
      * Creates a new jar that only contains the DynamicInstrumentationAgent class.
      */
-    private static File createTempJar(final Class<?> clazz, final boolean agent, final Class<?>... additionalClasses)
-            throws Exception {
+    private static File createTempJar(final Class<?> clazz, final String uuid, final boolean agent,
+            final Class<?>... additionalClasses) throws Exception {
         final String className = clazz.getName();
-        final File tempAgentJar = new File(DynamicInstrumentationProperties.TEMP_DIRECTORY, className + ".jar");
+        final StringBuilder fileName = new StringBuilder(className);
+        if (uuid != null) {
+            fileName.append("_");
+            fileName.append(uuid);
+        }
+        fileName.append(".jar");
+        final File tempAgentJar = new File(DynamicInstrumentationProperties.TEMP_DIRECTORY, fileName.toString());
         final Manifest manifest = new Manifest(clazz.getResourceAsStream("/META-INF/MANIFEST.MF"));
         if (agent) {
             manifest.getMainAttributes().putValue("Premain-Class", className);
@@ -206,6 +215,12 @@ public final class DynamicInstrumentationLoader {
                 IOUtils.copy(additionalClassIn, tempJarOut);
                 tempJarOut.closeEntry();
             }
+        }
+        if (uuid != null) {
+            final JarEntry uuidEntry = new JarEntry(DynamicInstrumentationAgent.UUID_FILE_NAME);
+            tempJarOut.putNextEntry(uuidEntry);
+            IOUtils.write(uuid, tempJarOut, Charset.defaultCharset());
+            tempJarOut.closeEntry();
         }
         tempJarOut.close();
         return tempAgentJar;
