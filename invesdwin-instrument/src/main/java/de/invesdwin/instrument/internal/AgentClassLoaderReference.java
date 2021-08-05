@@ -3,10 +3,10 @@ package de.invesdwin.instrument.internal;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-// @NotThreadSafe
+// @ThreadSafe
 public final class AgentClassLoaderReference {
 
-    private static final Map<String, ClassLoader> UUID_AGENTCLASSLOADER = new ConcurrentHashMap<>();;
+    private static final Map<String, ClassLoader> UUID_AGENTCLASSLOADER = new ConcurrentHashMap<>();
 
     private AgentClassLoaderReference() {
     }

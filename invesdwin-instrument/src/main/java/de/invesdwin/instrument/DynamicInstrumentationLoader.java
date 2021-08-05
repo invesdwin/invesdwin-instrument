@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -23,9 +22,10 @@ import org.zeroturnaround.exec.ProcessExecutor;
 import org.zeroturnaround.exec.stream.slf4j.Slf4jStream;
 
 import de.invesdwin.instrument.internal.AgentClassLoaderReference;
-import de.invesdwin.instrument.internal.DynamicInstrumentationAgent;
+import de.invesdwin.instrument.internal.DynamicInstrumentationAgentCompiler;
 import de.invesdwin.instrument.internal.DynamicInstrumentationLoadAgentMain;
 import de.invesdwin.instrument.internal.JdkFilesFinder;
+import de.invesdwin.instrument.internal.compile.DynamicInstrumentationClassInfo;
 
 @ThreadSafe
 public final class DynamicInstrumentationLoader {
@@ -78,7 +78,7 @@ public final class DynamicInstrumentationLoader {
     static {
         if (!isInitialized()) {
             try {
-                final String uuid = UUID.randomUUID().toString();
+                final String uuid = UUID.randomUUID().toString().replace("-", "");
                 final File tempAgentJar = createTempAgentJar(uuid);
                 setAgentClassLoaderReference(uuid);
                 final String pid = DynamicInstrumentationProperties.getProcessId();
@@ -156,7 +156,7 @@ public final class DynamicInstrumentationLoader {
 
     private static void setAgentClassLoaderReference(final String uuid) throws Exception {
         final Class<AgentClassLoaderReference> agentClassLoaderReferenceClass = AgentClassLoaderReference.class;
-        final File tempAgentClassLoaderJar = createTempJar(agentClassLoaderReferenceClass, uuid, false);
+        final File tempAgentClassLoaderJar = createTempJar(agentClassLoaderReferenceClass, null, false);
         DynamicInstrumentationReflections.addPathToSystemClassLoader(tempAgentClassLoaderJar);
         final ClassLoader systemClassLoader = DynamicInstrumentationReflections.getSystemClassLoader();
         final Class<?> systemAgentClassLoaderReferenceClass = systemClassLoader
@@ -168,9 +168,13 @@ public final class DynamicInstrumentationLoader {
 
     private static File createTempAgentJar(final String uuid) throws ClassNotFoundException {
         try {
-            return createTempJar(DynamicInstrumentationAgent.class, uuid, true);
+            final DynamicInstrumentationClassInfo classInfo = DynamicInstrumentationAgentCompiler.compile(uuid);
+            final String className = classInfo.toString();
+            try (InputStream classIn = classInfo.newInputStream()) {
+                return createTempJar(className, classIn, uuid, true);
+            }
         } catch (final Throwable e) {
-            final String message = "Unable to find class [de.invesdwin.instrument.internal.DynamicInstrumentationAgent] in classpath."
+            final String message = "Unable to find file [de.invesdwin.instrument.internal.DynamicInstrumentationAgent.java.template] in classpath."
                     + "\nPlease make sure you have added invesdwin-instrument.jar to your classpath properly,"
                     + "\nor make sure you have embedded it correctly into your fat-jar."
                     + "\nThey can be created e.g. with \"maven-shade-plugin\"."
@@ -179,12 +183,19 @@ public final class DynamicInstrumentationLoader {
         }
     }
 
-    /**
-     * Creates a new jar that only contains the DynamicInstrumentationAgent class.
-     */
     private static File createTempJar(final Class<?> clazz, final String uuid, final boolean agent,
             final Class<?>... additionalClasses) throws Exception {
         final String className = clazz.getName();
+        try (InputStream classIn = DynamicInstrumentationReflections.getClassInputStream(clazz)) {
+            return createTempJar(className, classIn, uuid, agent, additionalClasses);
+        }
+    }
+
+    /**
+     * Creates a new jar that only contains the DynamicInstrumentationAgent class.
+     */
+    private static File createTempJar(final String className, final InputStream classIn, final String uuid,
+            final boolean agent, final Class<?>... additionalClasses) throws Exception {
         final StringBuilder fileName = new StringBuilder(className);
         if (uuid != null) {
             fileName.append("_");
@@ -192,7 +203,8 @@ public final class DynamicInstrumentationLoader {
         }
         fileName.append(".jar");
         final File tempAgentJar = new File(DynamicInstrumentationProperties.TEMP_DIRECTORY, fileName.toString());
-        final Manifest manifest = new Manifest(clazz.getResourceAsStream("/META-INF/MANIFEST.MF"));
+        final Manifest manifest = new Manifest(
+                DynamicInstrumentationLoader.class.getResourceAsStream("/META-INF/MANIFEST.MF"));
         if (agent) {
             manifest.getMainAttributes().putValue("Premain-Class", className);
             manifest.getMainAttributes().putValue("Agent-Class", className);
@@ -202,7 +214,6 @@ public final class DynamicInstrumentationLoader {
         final JarOutputStream tempJarOut = new JarOutputStream(new FileOutputStream(tempAgentJar), manifest);
         final JarEntry entry = new JarEntry(className.replace(".", "/") + ".class");
         tempJarOut.putNextEntry(entry);
-        final InputStream classIn = DynamicInstrumentationReflections.getClassInputStream(clazz);
         IOUtils.copy(classIn, tempJarOut);
         tempJarOut.closeEntry();
         if (additionalClasses != null) {
@@ -215,12 +226,6 @@ public final class DynamicInstrumentationLoader {
                 IOUtils.copy(additionalClassIn, tempJarOut);
                 tempJarOut.closeEntry();
             }
-        }
-        if (uuid != null) {
-            final JarEntry uuidEntry = new JarEntry(DynamicInstrumentationAgent.UUID_FILE_NAME);
-            tempJarOut.putNextEntry(uuidEntry);
-            IOUtils.write(uuid, tempJarOut, Charset.defaultCharset());
-            tempJarOut.closeEntry();
         }
         tempJarOut.close();
         return tempAgentJar;

@@ -10,7 +10,8 @@ import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver
 @NotThreadSafe
 public final class AgentInstrumentationInitializer {
 
-    private AgentInstrumentationInitializer() {}
+    private AgentInstrumentationInitializer() {
+    }
 
     public static void initialize(final String args, final Instrumentation inst) {
         if (InstrumentationLoadTimeWeaver.isInstrumentationAvailable()) {
