@@ -5,12 +5,12 @@ import java.lang.reflect.Method;
 
 // CHECKSTYLE:OFF
 // @Immutable
-public final class DynamicInstrumentationAgent_<UUID> {
+public final class DynamicInstrumentationAgent_6 {
     //CHECKSTYLE:ON
 
-    private static final String UUID = "<UUID>";
+    private static final String UUID = "6";
 
-    private DynamicInstrumentationAgent_<UUID>() {
+    private DynamicInstrumentationAgent_6() {
     }
 
     public static void premain(final String args, final Instrumentation inst) throws Exception {
@@ -20,7 +20,7 @@ public final class DynamicInstrumentationAgent_<UUID> {
             agentClassLoader = Thread.currentThread().getContextClassLoader();
         }
         final Class<?> agentInstrumentationInitializer = agentClassLoader.loadClass(
-                DynamicInstrumentationAgent_<UUID>.class.getPackage().getName() + ".AgentInstrumentationInitializer");
+                DynamicInstrumentationAgent_6.class.getPackage().getName() + ".AgentInstrumentationInitializer");
         final Method initializeMethod = agentInstrumentationInitializer.getDeclaredMethod("initialize", String.class,
                 Instrumentation.class);
         initializeMethod.invoke(null, args, inst);

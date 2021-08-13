@@ -115,7 +115,7 @@ public final class DynamicInstrumentationReflections {
                     throw e;
                 }
             }
-        } while( field == null);
+        } while (field == null);
         return field;
     }
 

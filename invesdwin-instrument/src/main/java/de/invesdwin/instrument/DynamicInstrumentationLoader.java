@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
@@ -22,6 +21,7 @@ import org.zeroturnaround.exec.ProcessExecutor;
 import org.zeroturnaround.exec.stream.slf4j.Slf4jStream;
 
 import de.invesdwin.instrument.internal.AgentClassLoaderReference;
+import de.invesdwin.instrument.internal.DynamicInstrumentationAgent;
 import de.invesdwin.instrument.internal.DynamicInstrumentationAgentCompiler;
 import de.invesdwin.instrument.internal.DynamicInstrumentationLoadAgentMain;
 import de.invesdwin.instrument.internal.JdkFilesFinder;
@@ -78,16 +78,53 @@ public final class DynamicInstrumentationLoader {
     static {
         if (!isInitialized()) {
             try {
-                final String uuid = UUID.randomUUID().toString().replace("-", "");
-                final File tempAgentJar = createTempAgentJar(uuid);
+                String uuid = null;
+                File tempAgentJar = null;
+
+                //first try a precompiled agent, since lombok might cause exceptions during compilation
+                uuid = DynamicInstrumentationAgentCompiler.nextPrecompiledUuid();
+                if (uuid != null) {
+                    try {
+                        tempAgentJar = createPrecompiledTempAgentJar(uuid);
+                    } catch (final Throwable t) {
+                        //CHECKSTYLE:OFF
+                        new RuntimeException("Ignoring: Error loading precompiled agent, falling back to compiled ...",
+                                t).printStackTrace();
+                        //CHECKSYLE:ON
+                        uuid = null;
+                        tempAgentJar = null;
+                    }
+                }
+                if (uuid == null) {
+                    uuid = DynamicInstrumentationAgentCompiler.nextCompileUuid();
+                    if (uuid != null) {
+                        try {
+                            tempAgentJar = createCompiledTempAgentJar(uuid);
+                        } catch (final Throwable t) {
+                            //CHECKSTYLE:OFF
+                            new RuntimeException("Ignoring: Error loading compiled agent, falling back to default ...",
+                                    t).printStackTrace();
+                            //CHECKSTYLE:ON
+                            uuid = null;
+                            tempAgentJar = null;
+                        }
+                    }
+                }
+                if (uuid == null) {
+                    uuid = DynamicInstrumentationAgent.DEFAULT_UUID;
+                    tempAgentJar = createDefaultTempAgentJar(null);
+                }
+
                 setAgentClassLoaderReference(uuid);
                 final String pid = DynamicInstrumentationProperties.getProcessId();
+                final File finalTempAgentJar = tempAgentJar;
+                final String finalUuid = uuid;
                 final Thread loadAgentThread = new Thread() {
 
                     @Override
                     public void run() {
                         try {
-                            loadAgent(tempAgentJar, pid, uuid);
+                            loadAgent(finalTempAgentJar, pid, finalUuid);
                         } catch (final Throwable e) {
                             threadFailed = e;
                             throw new RuntimeException(e);
@@ -111,7 +148,7 @@ public final class DynamicInstrumentationLoader {
 
                 loadAgentThread.start();
             } catch (final Exception e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("Final exception during agent loading:", e);
             }
 
         }
@@ -166,7 +203,39 @@ public final class DynamicInstrumentationLoader {
         setAgentClassLoaderMethod.invoke(null, uuid, DynamicInstrumentationReflections.getContextClassLoader());
     }
 
-    private static File createTempAgentJar(final String uuid) throws ClassNotFoundException {
+    private static File createDefaultTempAgentJar(final String uuid) throws ClassNotFoundException {
+        try {
+            return createTempJar(DynamicInstrumentationAgent.class, uuid, true);
+        } catch (final Throwable e) {
+            throw newClassNotFoundException(
+                    "de.invesdwin.instrument.internal.DynamicInstrumentationAgent_" + uuid + ".class", e);
+        }
+    }
+
+    private static File createPrecompiledTempAgentJar(final String uuid) throws ClassNotFoundException {
+        try {
+            final DynamicInstrumentationClassInfo classInfo = DynamicInstrumentationAgentCompiler.precompiled(uuid);
+            final String className = classInfo.toString();
+            try (InputStream classIn = classInfo.newInputStream()) {
+                return createTempJar(className, classIn, uuid, true);
+            }
+        } catch (final Throwable e) {
+            throw newClassNotFoundException(
+                    "de.invesdwin.instrument.internal.DynamicInstrumentationAgent_" + uuid + ".class", e);
+        }
+    }
+
+    private static ClassNotFoundException newClassNotFoundException(final String file, final Throwable e) {
+        final String message = "Unable to find file [" + file + "] in classpath."
+                + "\nPlease make sure you have added invesdwin-instrument.jar to your classpath properly,"
+                + "\nor make sure you have embedded it correctly into your fat-jar."
+                + "\nThey can be created e.g. with \"maven-shade-plugin\"."
+                + "\nPlease be aware that some fat-jar solutions might not work well due to classloader issues: "
+                + e.toString();
+        return new ClassNotFoundException(message, e);
+    }
+
+    private static File createCompiledTempAgentJar(final String uuid) throws ClassNotFoundException {
         try {
             final DynamicInstrumentationClassInfo classInfo = DynamicInstrumentationAgentCompiler.compile(uuid);
             final String className = classInfo.toString();
@@ -174,20 +243,20 @@ public final class DynamicInstrumentationLoader {
                 return createTempJar(className, classIn, uuid, true);
             }
         } catch (final Throwable e) {
-            final String message = "Unable to find file [de.invesdwin.instrument.internal.DynamicInstrumentationAgent.java.template] in classpath."
-                    + "\nPlease make sure you have added invesdwin-instrument.jar to your classpath properly,"
-                    + "\nor make sure you have embedded it correctly into your fat-jar."
-                    + "\nThey can be created e.g. with \"maven-shade-plugin\"."
-                    + "\nPlease be aware that some fat-jar solutions might not work well due to classloader issues.";
-            throw new ClassNotFoundException(message, e);
+            throw newClassNotFoundException(
+                    "de.invesdwin.instrument.internal.DynamicInstrumentationAgent_" + uuid + ".class", e);
         }
     }
 
     private static File createTempJar(final Class<?> clazz, final String uuid, final boolean agent,
             final Class<?>... additionalClasses) throws Exception {
-        final String className = clazz.getName();
-        try (InputStream classIn = DynamicInstrumentationReflections.getClassInputStream(clazz)) {
-            return createTempJar(className, classIn, uuid, agent, additionalClasses);
+        try {
+            final String className = clazz.getName();
+            try (InputStream classIn = DynamicInstrumentationReflections.getClassInputStream(clazz)) {
+                return createTempJar(className, classIn, uuid, agent, additionalClasses);
+            }
+        } catch (final Throwable e) {
+            throw newClassNotFoundException(clazz.getName() + ".class", e);
         }
     }
 
