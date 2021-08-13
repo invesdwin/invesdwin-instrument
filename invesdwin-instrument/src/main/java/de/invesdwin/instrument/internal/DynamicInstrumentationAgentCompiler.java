@@ -18,8 +18,9 @@ public final class DynamicInstrumentationAgentCompiler {
     public static final String UUID_PLACEHOLDER = "<UUID>";
     public static final String TEMPLATE = DynamicInstrumentationAgent.class.getSimpleName() + ".java.template";
 
-    private static final int MAX_PRECOMPILED = 9;
-    private static int nextPrecompiled = 1;
+    public static final int FIRST_PRECOMPILED_UUID = 1;
+    public static final int MAX_PRECOMPILED_UUID = 9;
+    private static int nextPrecompiledUuid = FIRST_PRECOMPILED_UUID;
 
     private DynamicInstrumentationAgentCompiler() {
     }
@@ -32,11 +33,11 @@ public final class DynamicInstrumentationAgentCompiler {
     }
 
     public static synchronized String nextPrecompiledUuid() {
-        if (nextPrecompiled > MAX_PRECOMPILED) {
+        if (nextPrecompiledUuid > MAX_PRECOMPILED_UUID) {
             return null;
         }
-        final String uuid = String.valueOf(nextPrecompiled);
-        nextPrecompiled++;
+        final String uuid = String.valueOf(nextPrecompiledUuid);
+        nextPrecompiledUuid++;
         return uuid;
     }
 

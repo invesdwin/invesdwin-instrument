@@ -20,7 +20,7 @@ public class DynamicInstrumentationAgentGenerator {
                 "src/main/java/" + DynamicInstrumentationAgent.class.getPackageName().replace(".", "/"));
         final String template = org.apache.commons.io.FileUtils.readFileToString(
                 new File(folder, DynamicInstrumentationAgentCompiler.TEMPLATE), Charset.defaultCharset());
-        for (int i = 1; i <= 9; i++) {
+        for (int i = DynamicInstrumentationAgentCompiler.FIRST_PRECOMPILED; i <= DynamicInstrumentationAgentCompiler.MAX_PRECOMPILED; i++) {
             final File newFile = new File(folder,
                     DynamicInstrumentationAgent.class.getSimpleName() + "_" + i + ".java");
             org.apache.commons.io.FileUtils.writeStringToFile(newFile,
