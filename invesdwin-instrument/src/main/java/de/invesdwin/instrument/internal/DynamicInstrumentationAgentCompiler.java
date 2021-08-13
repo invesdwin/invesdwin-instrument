@@ -19,7 +19,7 @@ public final class DynamicInstrumentationAgentCompiler {
     public static final String TEMPLATE = DynamicInstrumentationAgent.class.getSimpleName() + ".java.template";
 
     public static final int FIRST_PRECOMPILED_UUID = 1;
-    public static final int MAX_PRECOMPILED_UUID = 9;
+    public static final int MAX_PRECOMPILED_UUID = 25;
     private static int nextPrecompiledUuid = FIRST_PRECOMPILED_UUID;
 
     private DynamicInstrumentationAgentCompiler() {
