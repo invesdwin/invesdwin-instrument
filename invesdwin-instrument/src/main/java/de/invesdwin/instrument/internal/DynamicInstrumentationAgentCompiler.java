@@ -1,7 +1,6 @@
 package de.invesdwin.instrument.internal;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -89,7 +88,7 @@ public final class DynamicInstrumentationAgentCompiler {
     }
 
     private static byte[] readToBytes(final InputStream in) throws IOException {
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        final java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
         final byte[] buf = new byte[8192];
         //convert file into array of bytes
         long count = 0;

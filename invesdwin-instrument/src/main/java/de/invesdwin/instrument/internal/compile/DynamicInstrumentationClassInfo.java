@@ -1,6 +1,5 @@
 package de.invesdwin.instrument.internal.compile;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 // @NotThreadSafe
@@ -30,7 +29,7 @@ public class DynamicInstrumentationClassInfo {
     }
 
     public InputStream newInputStream() {
-        return new ByteArrayInputStream(bytes);
+        return new java.io.ByteArrayInputStream(bytes);
     }
 
     @Override
@@ -48,7 +47,8 @@ public class DynamicInstrumentationClassInfo {
         if (this == obj) {
             return true;
         }
-        if ((obj instanceof DynamicInstrumentationClassInfo) && ((DynamicInstrumentationClassInfo) obj).className.equals(this.className)) {
+        if ((obj instanceof DynamicInstrumentationClassInfo)
+                && ((DynamicInstrumentationClassInfo) obj).className.equals(this.className)) {
             return true;
         }
         return false;
