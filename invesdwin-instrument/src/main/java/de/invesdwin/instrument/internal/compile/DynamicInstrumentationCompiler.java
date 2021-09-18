@@ -155,7 +155,8 @@ public final class DynamicInstrumentationCompiler {
     }
 
     private static File getTmpDir() throws IOException {
-        final String name = DynamicInstrumentationProperties.TEMP_DIRECTORY + "/" + DynamicInstrumentationCompiler.class.getSimpleName();
+        final String name = DynamicInstrumentationProperties.TEMP_DIRECTORY + "/"
+                + DynamicInstrumentationCompiler.class.getSimpleName();
         final File rootDir = new File(name);
         if (!rootDir.mkdir()) {
             throw new IOException("Unable to make tmp directory " + rootDir.getAbsolutePath());
@@ -178,7 +179,8 @@ public final class DynamicInstrumentationCompiler {
         }
     }
 
-    private static void addClasses(final List<DynamicInstrumentationClassInfo> ret, final String pkgName, final File dir) throws IOException {
+    private static void addClasses(final List<DynamicInstrumentationClassInfo> ret, final String pkgName,
+            final File dir) throws IOException {
         for (final File f : dir.listFiles()) {
             final String fname = f.getName();
             if (f.isDirectory()) {
