@@ -17,7 +17,7 @@ public class DynamicInstrumentationAgentGenerator {
     @Test
     public void test() throws IOException {
         final File folder = new File(
-                "src/main/java/" + DynamicInstrumentationAgent.class.getPackageName().replace(".", "/"));
+                "src/main/java/" + DynamicInstrumentationAgent.class.getPackage().getName().replace(".", "/"));
         final String template = org.apache.commons.io.FileUtils.readFileToString(
                 new File(folder, DynamicInstrumentationAgentCompiler.TEMPLATE), Charset.defaultCharset());
         for (int i = DynamicInstrumentationAgentCompiler.FIRST_PRECOMPILED_UUID; i <= DynamicInstrumentationAgentCompiler.MAX_PRECOMPILED_UUID; i++) {
