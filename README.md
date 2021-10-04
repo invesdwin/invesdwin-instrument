@@ -29,6 +29,10 @@ static {
   DynamicInstrumentationLoader.initLoadTimeWeavingContext(); //weave all classes before they are loaded as beans
 }
 ```
+
+
+### Spring-Boot
+
 With [spring-boot](http://projects.spring.io/spring-boot/) you have to ensure that the context in the aspects is updated by importing the one responsible for initializing the load time weaving into the spring-boot configuration:
 ```java
 @SpringBootApplication
