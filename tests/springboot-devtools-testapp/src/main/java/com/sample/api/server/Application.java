@@ -4,6 +4,7 @@ import java.lang.instrument.Instrumentation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.aspectj.weaver.loadtime.Agent;
 import org.burningwave.core.assembler.StaticComponentContainer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

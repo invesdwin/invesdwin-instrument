@@ -2,7 +2,7 @@
 <!DOCTYPE aspectj PUBLIC "-//AspectJ//DTD//EN" "http://www.eclipse.org/aspectj/dtd/aspectj.dtd">
 <aspectj>
 	<weaver
-		options="-Xset:weaveJavaxPackages=true -verbose -showWeaveInfo -Xset:weaveJavaxPackages=true">
+		options="-Xset:weaveJavaxPackages=true -verbose -showWeaveInfo -Xreweavable">
 		<include within="com.sample.api.server.core.service.impl.*" />
 		<include within="com.sample.api.server.test.*" />
 	</weaver>
