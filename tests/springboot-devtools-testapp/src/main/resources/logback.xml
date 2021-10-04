@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
+<configuration
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<property name="pattern"
+		value="%d{yyyy-MM-dd HH:mm:ss} [%replace(%t){'-', '_'}] [%level] %logger{36} - %msg%n" />
+	<property name="fileSize" value="50MB" />
+
+	<!-- console logger -->
+	<appender name="STDOUT"
+		class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>${pattern}</pattern>
+		</encoder>
+	</appender>
+
+
+	<!-- Application Loggers -->
+	<logger name="com.sample.api" level="ALL" additivity="true"/>
+	
+
+	<!-- 3rdparty Loggers -->
+	<logger name="org.springframework.core" level="INFO" additivity="true"/>
+	<logger name="org.springframework.beans" level="INFO" additivity="true"/>
+	<logger name="org.springframework.context" level="INFO" additivity="true"/>
+	<logger name="org.springframework.web" level="INFO" additivity="true"/>
+	<logger name="org.springframework.session.web" level="INFO" additivity="true"/>
+    <logger name="org.springframework.jndi" level="OFF" additivity="true" />
+	<logger name="org.springframework.security.web.access.intercept" level="OFF" additivity="true"/>
+    <logger name="org.apache.commons.beanutils" level="INFO" additivity="true" />
+	<logger name="com.zaxxer" level="OFF" additivity="true" />
+    <logger name="org.apache.ibatis" level="INFO" additivity="true" />
+    <logger name="org.mybatis.spring.mapper" level="INFO" additivity="true" />
+    
+    
+    <!-- http client Loggers -->
+	<!--     <logger name="org.apache.http" level="DEBUG" additivity="true" /> -->
+    <logger name="org.apache.http.wire" level="DEBUG" additivity="true" />
+	<logger name="org.apache.http.impl.conn.PoolingHttpClientConnectionManager" level="OFF" additivity="true"/>
+	
+	<!-- 	hiberate -->
+	<logger name="org.hibernate.SQL" level="DEBUG" additivity="true"/>
+    <logger name="org.hibernate.type" level="TRACE" additivity="true"/>
+    <logger name="org.hibernate.engine.internal.TwoPhaseLoad" level="DEBUG" additivity="true"/>
+
+	<root level="INFO">
+		<appender-ref ref="STDOUT" />
+	</root>
+
+</configuration>

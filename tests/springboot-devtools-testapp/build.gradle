@@ -1,0 +1,123 @@
+plugins {
+    // Plugins DSL:
+    id 'java'
+    id 'eclipse'
+	id 'org.springframework.boot' version '2.3.12.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'io.franzbecker.gradle-lombok' version '4.0.0'
+	id 'com.diffplug.eclipse.apt' version '3.31.0'
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+configurations.compileOnly.setCanBeResolved(true)
+eclipse.project {
+        natures 'org.eclipse.buildship.core.gradleprojectnature'
+}
+
+ext {
+	springSecurityOauth2Version = '2.3.8.RELEASE'
+	postgresqlCPVersion = '42.2.23'
+	hikariCPVersion = '4.0.3'
+	mapstructVersion = '1.4.2.Final'
+	quartzVersion = '2.3.2'
+	commonsioVersion = '2.11.0'
+	swaggerVersion = '3.0.0'
+	aspectjWeaverVersion = '1.9.7'
+	ztExecVersion = '1.12'
+}
+
+dependencies {
+
+	// embedded container
+	//compileOnly 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-undertow'
+	
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	implementation 'org.springframework:spring-messaging'
+    
+	// Spring data    
+	//implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework:spring-tx'
+	
+	// security
+    //implementation 'org.springframework.boot:spring-boot-starter-security'
+    //implementation "org.springframework.security.oauth:spring-security-oauth2:$springSecurityOauth2Version"
+	
+	// postgres
+    implementation "org.postgresql:postgresql:$postgresqlCPVersion"
+	
+	// HikariCP
+    implementation "com.zaxxer:HikariCP:$hikariCPVersion"
+    
+    // Java Bean mapper
+    implementation "org.mapstruct:mapstruct:$mapstructVersion"
+    
+    // cache
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'org.ehcache:ehcache'
+    
+    
+    // quartz
+    implementation 'org.springframework:spring-context-support'
+    implementation "org.quartz-scheduler:quartz:$quartzVersion"
+	
+	// apche library
+	implementation "commons-io:commons-io:$commonsioVersion"
+	implementation 'org.apache.commons:commons-lang3'
+	implementation 'org.apache.httpcomponents:httpclient'
+	
+	// swagger
+	implementation "io.springfox:springfox-boot-starter:$swaggerVersion"
+	
+	// @EnableLoadTimeWeaving
+	implementation "org.aspectj:aspectjweaver:$aspectjWeaverVersion"
+	implementation "org.zeroturnaround:zt-exec:$ztExecVersion"
+	implementation 'org.springframework:spring-instrument'
+	implementation 'org.springframework:spring-aspects'
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
+	
+	// local libs
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    
+    // Enable annotation processor
+    annotationProcessor "org.projectlombok:lombok"
+	annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+    annotationProcessor "org.mapstruct:mapstruct-processor:$mapstructVersion"
+    //annotationProcessor "org.projectlombok:lombok-mapstruct-binding:0.2.0"
+	
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	
+	// Spring test
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.junit.platform:junit-platform-commons:1.7.2'
+}
+
+
+configurations {
+    all {
+        exclude module: 'spring-boot-starter-tomcat'
+        exclude module: 'org.apache.tomcat.embed'
+        
+        // exclude older HikariCP
+        exclude group: 'com.zaxxer', module: 'HikariCP-java6'
+        
+        // exclude other log implementation
+        exclude group: 'commons-logging', module: 'commons-logging'
+        exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+    	exclude group: 'log4j', module: 'log4j'
+    	exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
+    	exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
+   		exclude group: 'org.slf4j', module: 'jul-to-slf4j'
+   		exclude group: 'org.slf4j', module: 'jcl-over-slf4j'
+    }
+}
+
+bootJar {
+    mainClassName = 'com.sample.api.server.Application'
+}
