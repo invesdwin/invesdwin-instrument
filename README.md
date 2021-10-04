@@ -49,14 +49,16 @@ public class MySpringBootApplication {
 ```
 To enable the spring aspects, just add the [spring-aspects.jar](http://mvnrepository.com/artifact/org.springframework/spring-aspects) dependency to your project, they are enabled directly, others might need a [aop.xml](http://www.springbyexample.org/examples/aspectj-ltw-aspectj-config.html) to be enabled. Note that the "ctx.spring.weaving.xml" is part of the invesdwin-instrument jar.
 
-Also note spring-boot-devtools uses a `org.springframework.boot.devtools.restart.RestartLauncher` that reinitializes the application in a nested classloader. To work around this, use `org.aspectj.weaver.loadtime.Agent.agentmain("", InstrumentationSavingAgent.getInstrumentation());` inside the nested classloader to reinitialize AspectJ. Also you might have to add the AspectJ weaver option `-Xreweavable` to make it work properly.
-
 Make sure that the instrumentation is loaded before the classes of the aspects or the classes that use the aspects are loaded by the classloader. Only classes that get loaded after initializing load time weaving will be successfully woven by aspectj.
 
 Please note that you need to have a JDK installed with `tools.jar` available in it for this to work properly (this is not required anymore since Java 9).
 Alternatively just load the invesdwin-instrument jar via the `-javaagent <path>` JVM parameter if you only have a JRE installed. The dynamic loading will be skipped then.
 
 For a sample usage see the junit test cases in the [invesdwin-aspects](https://github.com/subes/invesdwin-aspects) project or the spring-boot example project in [invesdwin-nowicket](https://github.com/subes/invesdwin-nowicket).
+
+### Spring-Boot-Devtools
+
+Also note spring-boot-devtools uses a `org.springframework.boot.devtools.restart.RestartLauncher` that reinitializes the application in a nested classloader. To work around this, use `org.aspectj.weaver.loadtime.Agent.agentmain("", InstrumentationSavingAgent.getInstrumentation());` inside the nested classloader to reinitialize AspectJ. Also you might have to add the AspectJ weaver option `-Xreweavable` to make it work properly.
 
 ## Support
 
