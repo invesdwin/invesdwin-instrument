@@ -42,12 +42,14 @@ public class MySpringBootApplication {
     public static void main(final String[] args) {
         DynamicInstrumentationLoader.waitForInitialized(); //dynamically attach java agent to jvm if not already present
         DynamicInstrumentationLoader.initLoadTimeWeavingContext(); //weave all classes before they are loaded as beans
+	//org.aspectj.weaver.loadtime.Agent.agentmain("", InstrumentationSavingAgent.getInstrumentation()); //workaround for spring-boot-devtools RestartLauncher
         SpringApplication.run(MySpringBootApplication.class, args); //start application, load some classes
     }
 }
 ```
 To enable the spring aspects, just add the [spring-aspects.jar](http://mvnrepository.com/artifact/org.springframework/spring-aspects) dependency to your project, they are enabled directly, others might need a [aop.xml](http://www.springbyexample.org/examples/aspectj-ltw-aspectj-config.html) to be enabled. Note that the "ctx.spring.weaving.xml" is part of the invesdwin-instrument jar.
 
+Also note spring-boot-devtools uses a `org.springframework.boot.devtools.restart.RestartLauncher` that reinitializes the application in a nested classloader. To work around this, use `org.aspectj.weaver.loadtime.Agent.agentmain("", InstrumentationSavingAgent.getInstrumentation());` inside the nested classloader to reinitialize AspectJ.
 
 Make sure that the instrumentation is loaded before the classes of the aspects or the classes that use the aspects are loaded by the classloader. Only classes that get loaded after initializing load time weaving will be successfully woven by aspectj.
 
