@@ -1,0 +1,8 @@
+<!DOCTYPE aspectj PUBLIC    
+  "-//AspectJ//DTD//EN"    "http://www.eclipse.org/aspectj/dtd/aspectj.dtd">
+
+<aspectj>
+	<aspects>
+		<aspect name="com.sample.api.server.test.TestAspect" />
+	</aspects>
+</aspectj>
