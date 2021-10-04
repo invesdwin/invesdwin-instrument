@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE aspectj PUBLIC "-//AspectJ//DTD//EN" "http://www.eclipse.org/aspectj/dtd/aspectj.dtd">
 <aspectj>
-	<weaver options="-Xset:weaveJavaxPackages=true -verbose -showWeaveInfo">
+	<weaver
+		options="-Xset:weaveJavaxPackages=true -verbose -showWeaveInfo -Xset:weaveJavaxPackages=true">
 		<include within="com.sample.api.server.core.service.impl.*" />
+		<include within="com.sample.api.server.test.*" />
 	</weaver>
+	<aspects>
+		<aspect name="com.sample.api.server.test.TestAspect" />
+	</aspects>
 </aspectj>

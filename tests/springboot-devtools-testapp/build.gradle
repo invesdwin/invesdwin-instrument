@@ -91,6 +91,7 @@ dependencies {
     annotationProcessor "org.mapstruct:mapstruct-processor:$mapstructVersion"
     //annotationProcessor "org.projectlombok:lombok-mapstruct-binding:0.2.0"
 	
+	implementation 'org.burningwave:core:10.0.0'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	
 	// Spring test
