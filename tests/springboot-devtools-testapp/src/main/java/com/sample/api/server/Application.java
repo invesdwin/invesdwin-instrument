@@ -35,6 +35,11 @@ public class Application extends SpringBootServletInitializer {
 
 	private static void load()
 			throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+		if (StaticComponentContainer.Modules != null) {
+			// Java 16 workaround for add-opens
+			StaticComponentContainer.Modules.exportAllToAll();
+		}
+
 		// dynamically attach java agent to jvm if not already present
 		DynamicInstrumentationLoader.waitForInitialized();
 
