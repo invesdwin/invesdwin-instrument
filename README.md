@@ -62,7 +62,7 @@ For a sample usage see the junit test cases in the [invesdwin-aspects](https://g
 
 ### Spring-Boot-Devtools
 
-Also note spring-boot-devtools uses a `org.springframework.boot.devtools.restart.RestartLauncher` that reinitializes the application in a nested classloader. This restart mechanism can be disabled via the system property `spring.devtools.restart.enabled=false`. To work around this, use `org.aspectj.weaver.loadtime.Agent.agentmain("", InstrumentationSavingAgent.getInstrumentation());` inside the nested classloader to reinitialize AspectJ. Also you might have to add the AspectJ weaver option `-Xreweavable` to make it work properly.
+Also note spring-boot-devtools uses a `org.springframework.boot.devtools.restart.RestartLauncher` that reinitializes the application in a nested classloader. This restart mechanism can be disabled via the system property `spring.devtools.restart.enabled=false`. To work around this, use `org.aspectj.weaver.loadtime.Agent.agentmain("", InstrumentationSavingAgent.getInstrumentation());` inside the nested classloader to reinitialize AspectJ. Also you might have to add the AspectJ weaver option `-Xreweavable` to make it work properly. For more details see: https://github.com/invesdwin/invesdwin-instrument/issues/24
 
 ## Support
 
