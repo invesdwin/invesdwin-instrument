@@ -23,7 +23,8 @@ public final class DynamicInstrumentationProperties {
 
     static {
         //CHECKSTYLE:OFF
-        String systemTempDir = System.getProperty(DynamicInstrumentationProperties.class.getName() + ".TEMP_DIRECTORY");
+        String systemTempDir = System
+                .getProperty(DynamicInstrumentationProperties.class.getName() + ".TEMP_DIRECTORY_OVERRIDE");
         if (systemTempDir == null) {
             systemTempDir = System.getProperty("java.io.tmpdir");
         }
