@@ -9,6 +9,7 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 public final class DynamicInstrumentationProperties {
 
+    public static final String TEMP_DIRECTORY_PARENT_NAME = "invesdwin_temp";
     /**
      * Process specific temp dir that gets cleaned on exit.
      */
@@ -22,9 +23,12 @@ public final class DynamicInstrumentationProperties {
 
     static {
         //CHECKSTYLE:OFF
-        final String systemTempDir = System.getProperty("java.io.tmpdir");
+        String systemTempDir = System.getProperty(DynamicInstrumentationProperties.class.getName() + ".TEMP_DIRECTORY");
+        if (systemTempDir == null) {
+            systemTempDir = System.getProperty("java.io.tmpdir");
+        }
         //CHECKSTYLE:ON
-        TEMP_DIRECTORY = newTempDirectory(new File(systemTempDir));
+        TEMP_DIRECTORY = newTempDirectory(new File(systemTempDir, TEMP_DIRECTORY_PARENT_NAME));
     }
 
     private DynamicInstrumentationProperties() {
