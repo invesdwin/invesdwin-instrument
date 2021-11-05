@@ -30,7 +30,7 @@ public final class DynamicInstrumentationProperties {
         if (systemTempDir == null) {
             systemTempDir = System.getProperty("java.io.tmpdir");
         }
-        TEMP_DIRECTORY_PARENT_NAME = "invesdwin_temp";
+        TEMP_DIRECTORY_PARENT_NAME = "invesdwin_temp_" + System.getProperty("user.name").replaceAll("[a-zA-Z0-9]", "");
         //CHECKSTYLE:ON
         final File baseDirectory = new File(systemTempDir, TEMP_DIRECTORY_PARENT_NAME);
         TEMP_DIRECTORY = newTempDirectory(baseDirectory);
