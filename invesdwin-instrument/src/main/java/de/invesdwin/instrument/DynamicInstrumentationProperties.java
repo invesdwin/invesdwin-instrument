@@ -3,13 +3,15 @@ package de.invesdwin.instrument;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.concurrent.Immutable;
 
 @Immutable
 public final class DynamicInstrumentationProperties {
 
-    public static final String TEMP_DIRECTORY_PARENT_NAME = "invesdwin_temp";
+    public static final String TEMP_DIRECTORY_PARENT_NAME;
     /**
      * Process specific temp dir that gets cleaned on exit.
      */
@@ -28,8 +30,10 @@ public final class DynamicInstrumentationProperties {
         if (systemTempDir == null) {
             systemTempDir = System.getProperty("java.io.tmpdir");
         }
+        TEMP_DIRECTORY_PARENT_NAME = "invesdwin_temp";
         //CHECKSTYLE:ON
-        TEMP_DIRECTORY = newTempDirectory(new File(systemTempDir, TEMP_DIRECTORY_PARENT_NAME));
+        final File baseDirectory = new File(systemTempDir, TEMP_DIRECTORY_PARENT_NAME);
+        TEMP_DIRECTORY = newTempDirectory(baseDirectory);
     }
 
     private DynamicInstrumentationProperties() {
@@ -37,11 +41,7 @@ public final class DynamicInstrumentationProperties {
 
     public static File newTempDirectory(final File baseDirectory) {
         final File tempDir = findEmptyTempDir(baseDirectory);
-        try {
-            org.apache.commons.io.FileUtils.forceMkdir(tempDir);
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
+        forceMkdirRetry(baseDirectory, tempDir);
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
@@ -49,6 +49,29 @@ public final class DynamicInstrumentationProperties {
             }
         });
         return tempDir;
+    }
+
+    private static void forceMkdirRetry(final File baseDirectory, final File tempDir) {
+        final ThreadLocalRandom random = ThreadLocalRandom.current();
+        final int maxTries = 3;
+        IOException lastException = null;
+        for (int tries = 0; tries < maxTries; tries++) {
+            try {
+                lastException = null;
+                org.apache.commons.io.FileUtils.forceMkdir(tempDir);
+                baseDirectory.setWritable(true, false);
+            } catch (final IOException e) {
+                lastException = e;
+                try {
+                    TimeUnit.MILLISECONDS.sleep(random.nextLong(100));
+                } catch (final InterruptedException e1) {
+                    throw new RuntimeException(e1);
+                }
+            }
+        }
+        if (lastException != null) {
+            throw new RuntimeException(lastException);
+        }
     }
 
     public static void setDeleteTempDirectoryRunner(final Runnable deleteTempDirectoryRunner) {
