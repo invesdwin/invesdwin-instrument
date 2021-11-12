@@ -199,7 +199,7 @@ public final class DynamicInstrumentationReflections {
             final String existingJavaLibraryPath = System.getProperty(javaLibraryPathKey);
             //CHECKSTYLE:ON
             final String newJavaLibraryPath;
-            if (!org.springframework.util.StringUtils.isEmpty(existingJavaLibraryPath)) {
+            if (!org.springframework.util.StringUtils.hasLength(existingJavaLibraryPath)) {
                 newJavaLibraryPath = existingJavaLibraryPath + File.pathSeparator + dir.getAbsolutePath();
             } else {
                 newJavaLibraryPath = dir.getAbsolutePath();
