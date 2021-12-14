@@ -64,6 +64,10 @@ For a sample usage see the junit test cases in the [invesdwin-aspects](https://g
 
 Note that [spring-boot-devtools](https://docs.spring.io/spring-boot/docs/current/reference/html/using.html#using.devtools) uses a `org.springframework.boot.devtools.restart.RestartLauncher` that reinitializes the application in a nested classloader. This restart mechanism can be disabled via the system property `spring.devtools.restart.enabled=false`, but that might disable functionality of spring-boot-devtools. To work around this, use `org.aspectj.weaver.loadtime.Agent.agentmain("", InstrumentationSavingAgent.getInstrumentation());` inside the nested classloader to reinitialize AspectJ. Also you might have to add the AspectJ weaver option `-Xreweavable` to make it work properly. For more details see: https://github.com/invesdwin/invesdwin-instrument/issues/24
 
+### Testing Aspects inside Unit Tests
+
+See discussion [here](https://stackoverflow.com/a/70348250/67492). The workaround is to use the aspects inside nested classes that are loaded after invesdwin-instrument is initialized by the unit test class. Example [here](https://github.com/invesdwin/invesdwin-context-persistence/blob/master/invesdwin-context-persistence-parent/invesdwin-context-persistence-jpa-hibernate/src/test/java/de/invesdwin/context/persistence/jpa/hibernate/MultiplePersistenceUnitsTest.java).
+
 ## Support
 
 If you need further assistance or have some ideas for improvements and don't want to create an issue here on github, feel free to start a discussion in our [invesdwin-platform](https://groups.google.com/forum/#!forum/invesdwin-platform) mailing list.
