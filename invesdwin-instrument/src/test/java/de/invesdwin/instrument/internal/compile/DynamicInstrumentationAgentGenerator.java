@@ -6,7 +6,7 @@ import java.nio.charset.Charset;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import de.invesdwin.instrument.internal.DynamicInstrumentationAgent;
 import de.invesdwin.instrument.internal.DynamicInstrumentationAgentCompiler;
