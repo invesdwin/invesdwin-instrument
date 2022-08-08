@@ -2,8 +2,6 @@ package de.invesdwin.instrument.internal;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -39,7 +37,7 @@ public class JdkFilesFinder {
             }
         }
         //sort file names descending to have the highest jdk version be searched first
-        Collections.sort(potentialOtherJavaHomes, new Comparator<File>() {
+        java.util.Collections.sort(potentialOtherJavaHomes, new Comparator<File>() {
             @Override
             public int compare(final File o1, final File o2) {
                 return o1.getName().compareTo(o2.getName()) * -1;
@@ -88,7 +86,8 @@ public class JdkFilesFinder {
 
     public File findAttachLib() {
         File attachLib = null;
-        final List<String> potentialFileNames = Arrays.asList("attach.dll", "libattach.so", "libattach.dylib");
+        final List<String> potentialFileNames = java.util.Arrays.asList("attach.dll", "libattach.so",
+                "libattach.dylib");
         OUTER: for (final File dir : potentialFolders) {
             for (final String attachLibFileName : potentialFileNames) {
                 attachLib = findFileRecursive(dir, attachLibFileName);

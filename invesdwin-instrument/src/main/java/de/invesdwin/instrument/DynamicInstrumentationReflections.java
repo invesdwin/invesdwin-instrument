@@ -11,7 +11,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
@@ -24,7 +23,8 @@ import org.springframework.instrument.InstrumentationSavingAgent;
 @Immutable
 public final class DynamicInstrumentationReflections {
 
-    private static Set<String> pathsAddedToSystemClassLoader = Collections.synchronizedSet(new HashSet<String>());
+    private static Set<String> pathsAddedToSystemClassLoader = java.util.Collections
+            .synchronizedSet(new HashSet<String>());
 
     private DynamicInstrumentationReflections() {
     }
@@ -183,7 +183,7 @@ public final class DynamicInstrumentationReflections {
     }
 
     public static Set<String> getPathsAddedToSystemClassLoader() {
-        return Collections.unmodifiableSet(pathsAddedToSystemClassLoader);
+        return java.util.Collections.unmodifiableSet(pathsAddedToSystemClassLoader);
     }
 
     /**
