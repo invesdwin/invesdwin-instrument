@@ -23,7 +23,7 @@
 		<version.compiler>1.8</version.compiler>
 
 		<version.maven-source-plugin>3.2.1</version.maven-source-plugin>
-		<version.maven-processor-plugin>4.5-jdk8</version.maven-processor-plugin>
+		<version.maven-processor-plugin>4.5</version.maven-processor-plugin>
 		<project.version.invesdwin-maven-plugin>1.0.14-SNAPSHOT</project.version.invesdwin-maven-plugin>
 		<version.maven-jar-plugin>3.3.0</version.maven-jar-plugin>
 		<version.maven-jdk-tools-wrapper>0.1</version.maven-jdk-tools-wrapper>
