@@ -23,15 +23,20 @@ import org.springframework.instrument.InstrumentationSavingAgent;
 @Immutable
 public final class DynamicInstrumentationReflections {
 
+    private static final URL[] EMPTY_URLS = new URL[0];
     private static Set<String> pathsAddedToSystemClassLoader = java.util.Collections
             .synchronizedSet(new HashSet<String>());
 
-    private DynamicInstrumentationReflections() {
-    }
+    private DynamicInstrumentationReflections() {}
 
     @SuppressWarnings({ "restriction", "unchecked" })
     public static URL[] getURLs(final ClassLoader classLoader) {
+        if (classLoader == null) {
+            throw new NullPointerException("classLoader should not be null");
+        }
+
         if (classLoader instanceof URLClassLoader) {
+            //java 8 and below
             return ((URLClassLoader) classLoader).getURLs();
         }
 
@@ -48,10 +53,10 @@ public final class DynamicInstrumentationReflections {
             synchronized (ucp) {
                 final Field pathField = ucp.getClass().getDeclaredField("path");
                 final ArrayList<URL> path = (ArrayList<URL>) unsafe.getObject(ucp, unsafe.objectFieldOffset(pathField));
-                return path.toArray(new URL[0]);
+                return path.toArray(EMPTY_URLS);
             }
         } catch (final NoSuchFieldException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(classLoader.getClass().getName(), e);
         }
     }
 
