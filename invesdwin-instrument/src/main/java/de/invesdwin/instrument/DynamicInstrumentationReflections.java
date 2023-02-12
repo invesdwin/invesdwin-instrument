@@ -67,6 +67,7 @@ public final class DynamicInstrumentationReflections {
         if (dirOrJar == null) {
             return;
         }
+        final ClassLoader systemClassLoader = getSystemClassLoader();
         try {
             final String normalizedPath = FilenameUtils.normalize(dirOrJar.getAbsolutePath());
             if (!pathsAddedToSystemClassLoader.add(normalizedPath)) {
@@ -74,10 +75,10 @@ public final class DynamicInstrumentationReflections {
             }
             final URL url = new File(normalizedPath).toURI().toURL();
             if (isBeforeJava9()) {
-                addUrlToURLClassLoader(url);
+                addUrlToURLClassLoader(systemClassLoader, url);
             } else {
                 //we are in java 9 or above
-                addUrlToAppClassLoaderURLClassPath(url);
+                addUrlToAppClassLoaderURLClassPath(systemClassLoader, url);
             }
         } catch (final NoSuchMethodException e) {
             org.springframework.util.ReflectionUtils.handleReflectionException(e);
@@ -92,7 +93,7 @@ public final class DynamicInstrumentationReflections {
         } catch (final InvocationTargetException e) {
             org.springframework.util.ReflectionUtils.handleReflectionException(e);
         } catch (final NoSuchFieldException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(systemClassLoader.getClass().getName(), e);
         }
     }
 
@@ -100,9 +101,8 @@ public final class DynamicInstrumentationReflections {
         return getSystemClassLoader() instanceof URLClassLoader;
     }
 
-    private static void addUrlToURLClassLoader(final URL url)
+    private static void addUrlToURLClassLoader(final ClassLoader systemClassLoader, final URL url)
             throws NoSuchMethodException, MalformedURLException, IllegalAccessException, InvocationTargetException {
-        final ClassLoader systemClassLoader = getSystemClassLoader();
         final Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
         method.setAccessible(true);
         method.invoke(systemClassLoader, url);
@@ -125,9 +125,8 @@ public final class DynamicInstrumentationReflections {
     }
 
     @SuppressWarnings({ "unchecked", "restriction" })
-    private static void addUrlToAppClassLoaderURLClassPath(final URL url)
+    private static void addUrlToAppClassLoaderURLClassPath(final ClassLoader systemClassLoader, final URL url)
             throws NoSuchFieldException, SecurityException {
-        final ClassLoader systemClassLoader = getSystemClassLoader();
         //normal way: --add-opens java.base/jdk.internal.loader=ALL-UNNAMED
         //hacker way: https://javax0.wordpress.com/2017/05/03/hacking-the-integercache-in-java-9/
         final sun.misc.Unsafe unsafe = getUnsafe();
