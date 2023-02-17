@@ -10,14 +10,22 @@ public final class DynamicInstrumentationAgent_2 {
 
     private static final String UUID = "2";
 
-    private DynamicInstrumentationAgent_2() {
-    }
+    private DynamicInstrumentationAgent_2() {}
 
     public static void premain(final String args, final Instrumentation inst) throws Exception {
-        ClassLoader agentClassLoader = AgentClassLoaderReference.getAgentClassLoader(UUID);
+        final Class<AgentClassLoaderReference> agentClassLoaderReferenceClass = AgentClassLoaderReference.class;
+        final ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
+        final Class<?> systemAgentClassLoaderReferenceClass = systemClassLoader
+                .loadClass(agentClassLoaderReferenceClass.getName());
+        final Method getAgentClassLoaderMethod = systemAgentClassLoaderReferenceClass
+                .getDeclaredMethod("getAgentClassLoader", String.class);
+        ClassLoader agentClassLoader = (ClassLoader) getAgentClassLoaderMethod.invoke(null, UUID);
         if (agentClassLoader == null) {
             //fallback to contextClassLoader, don't use external dependencies
             agentClassLoader = Thread.currentThread().getContextClassLoader();
+        }
+        if (agentClassLoader == null) {
+            agentClassLoader = systemClassLoader;
         }
         final Class<?> agentInstrumentationInitializer = agentClassLoader.loadClass(
                 DynamicInstrumentationAgent_2.class.getPackage().getName() + ".AgentInstrumentationInitializer");

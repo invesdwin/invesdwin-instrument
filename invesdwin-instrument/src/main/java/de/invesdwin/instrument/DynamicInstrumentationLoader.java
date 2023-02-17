@@ -1,5 +1,6 @@
 package de.invesdwin.instrument;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -38,8 +39,7 @@ public final class DynamicInstrumentationLoader {
      */
     private static GenericXmlApplicationContext ltwCtx;
 
-    private DynamicInstrumentationLoader() {
-    }
+    private DynamicInstrumentationLoader() {}
 
     public static boolean isInitialized() {
         return InstrumentationLoadTimeWeaver.isInstrumentationAvailable();
@@ -77,81 +77,102 @@ public final class DynamicInstrumentationLoader {
 
     static {
         if (!isInitialized()) {
-            try {
-                String uuid = null;
-                File tempAgentJar = null;
+            initialize();
+        }
+    }
 
-                //first try a precompiled agent, since lombok might cause exceptions during compilation
-                uuid = DynamicInstrumentationAgentCompiler.nextPrecompiledUuid();
+    private static void initialize() {
+        try {
+            String uuid = null;
+            File tempAgentJar = null;
+
+            //first try a precompiled agent, since lombok might cause exceptions during compilation
+            addAgentClassLoaderReferenceToSystemClassLoader();
+            uuid = nextPrecompiledUuid();
+            if (uuid != null) {
+                try {
+                    tempAgentJar = createPrecompiledTempAgentJar(uuid);
+                } catch (final Throwable t) {
+                    //CHECKSTYLE:OFF
+                    new RuntimeException("Ignoring: Error loading precompiled agent, falling back to compiled ...", t)
+                            .printStackTrace();
+                    //CHECKSYLE:ON
+                    uuid = null;
+                    tempAgentJar = null;
+                }
+            }
+            if (uuid == null) {
+                uuid = DynamicInstrumentationAgentCompiler.nextCompileUuid();
                 if (uuid != null) {
                     try {
-                        tempAgentJar = createPrecompiledTempAgentJar(uuid);
+                        tempAgentJar = createCompiledTempAgentJar(uuid);
                     } catch (final Throwable t) {
                         //CHECKSTYLE:OFF
-                        new RuntimeException("Ignoring: Error loading precompiled agent, falling back to compiled ...",
-                                t).printStackTrace();
-                        //CHECKSYLE:ON
+                        new RuntimeException("Ignoring: Error loading compiled agent, falling back to default ...", t)
+                                .printStackTrace();
+                        //CHECKSTYLE:ON
                         uuid = null;
                         tempAgentJar = null;
                     }
                 }
-                if (uuid == null) {
-                    uuid = DynamicInstrumentationAgentCompiler.nextCompileUuid();
-                    if (uuid != null) {
-                        try {
-                            tempAgentJar = createCompiledTempAgentJar(uuid);
-                        } catch (final Throwable t) {
-                            //CHECKSTYLE:OFF
-                            new RuntimeException("Ignoring: Error loading compiled agent, falling back to default ...",
-                                    t).printStackTrace();
-                            //CHECKSTYLE:ON
-                            uuid = null;
-                            tempAgentJar = null;
-                        }
-                    }
-                }
-                if (uuid == null) {
-                    uuid = DynamicInstrumentationAgent.DEFAULT_UUID;
-                    tempAgentJar = createDefaultTempAgentJar(null);
-                }
-
-                setAgentClassLoaderReference(uuid);
-                final String pid = DynamicInstrumentationProperties.getProcessId();
-                final File finalTempAgentJar = tempAgentJar;
-                final String finalUuid = uuid;
-                final Thread loadAgentThread = new Thread() {
-
-                    @Override
-                    public void run() {
-                        try {
-                            loadAgent(finalTempAgentJar, pid, finalUuid);
-                        } catch (final Throwable e) {
-                            threadFailed = e;
-                            throw new RuntimeException(e);
-                        }
-                    }
-                };
-
-                DynamicInstrumentationReflections.addPathToSystemClassLoader(tempAgentJar);
-
-                final JdkFilesFinder jdkFilesFinder = new JdkFilesFinder();
-
-                if (DynamicInstrumentationReflections.isBeforeJava9()) {
-                    final File toolsJar = jdkFilesFinder.findToolsJar();
-                    DynamicInstrumentationReflections.addPathToSystemClassLoader(toolsJar);
-                    DynamicInstrumentationLoader.toolsJarPath = toolsJar.getAbsolutePath();
-
-                    final File attachLib = jdkFilesFinder.findAttachLib();
-                    DynamicInstrumentationReflections.addPathToJavaLibraryPath(attachLib.getParentFile());
-                    DynamicInstrumentationLoader.attachLibPath = attachLib.getAbsolutePath();
-                }
-
-                loadAgentThread.start();
-            } catch (final Exception e) {
-                throw new RuntimeException("Final exception during agent loading:", e);
+            }
+            if (uuid == null) {
+                uuid = DynamicInstrumentationAgent.DEFAULT_UUID;
+                tempAgentJar = createDefaultTempAgentJar(null);
             }
 
+            setAgentClassLoaderReference(uuid);
+            final String pid = DynamicInstrumentationProperties.getProcessId();
+            final File finalTempAgentJar = tempAgentJar;
+            final String finalUuid = uuid;
+            final Thread loadAgentThread = new Thread() {
+
+                @Override
+                public void run() {
+                    try {
+                        loadAgent(finalTempAgentJar, pid, finalUuid);
+                    } catch (final Throwable e) {
+                        threadFailed = e;
+                        throw new RuntimeException(e);
+                    }
+                }
+            };
+
+            DynamicInstrumentationReflections.addPathToSystemClassLoader(tempAgentJar);
+
+            final JdkFilesFinder jdkFilesFinder = new JdkFilesFinder();
+
+            if (DynamicInstrumentationReflections.isBeforeJava9()) {
+                final File toolsJar = jdkFilesFinder.findToolsJar();
+                DynamicInstrumentationReflections.addPathToSystemClassLoader(toolsJar);
+                DynamicInstrumentationLoader.toolsJarPath = toolsJar.getAbsolutePath();
+
+                final File attachLib = jdkFilesFinder.findAttachLib();
+                DynamicInstrumentationReflections.addPathToJavaLibraryPath(attachLib.getParentFile());
+                DynamicInstrumentationLoader.attachLibPath = attachLib.getAbsolutePath();
+            }
+
+            loadAgentThread.start();
+        } catch (final Exception e) {
+            throw new RuntimeException("Final exception during agent loading:", e);
         }
+    }
+
+    private static String nextPrecompiledUuid() throws Exception {
+        final Class<AgentClassLoaderReference> agentClassLoaderReferenceClass = AgentClassLoaderReference.class;
+        final ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
+        final Class<?> systemAgentClassLoaderReferenceClass = systemClassLoader
+                .loadClass(agentClassLoaderReferenceClass.getName());
+        final Method nextPrecompiledUuidMethod = systemAgentClassLoaderReferenceClass
+                .getDeclaredMethod("nextPrecompiledUuid");
+        final String nextPrecompiledUuid = (String) nextPrecompiledUuidMethod.invoke(null);
+        return nextPrecompiledUuid;
+    }
+
+    private static void addAgentClassLoaderReferenceToSystemClassLoader() throws Exception {
+        final Class<AgentClassLoaderReference> agentClassLoaderReferenceClass = AgentClassLoaderReference.class;
+        final File tempAgentClassLoaderJar = createTempJar(agentClassLoaderReferenceClass, null, false);
+        DynamicInstrumentationReflections.addPathToSystemClassLoader(tempAgentClassLoaderJar);
     }
 
     private static void loadAgent(final File tempAgentJar, final String pid, final String uuid) throws Exception {
@@ -193,14 +214,21 @@ public final class DynamicInstrumentationLoader {
 
     private static void setAgentClassLoaderReference(final String uuid) throws Exception {
         final Class<AgentClassLoaderReference> agentClassLoaderReferenceClass = AgentClassLoaderReference.class;
-        final File tempAgentClassLoaderJar = createTempJar(agentClassLoaderReferenceClass, null, false);
-        DynamicInstrumentationReflections.addPathToSystemClassLoader(tempAgentClassLoaderJar);
         final ClassLoader systemClassLoader = DynamicInstrumentationReflections.getSystemClassLoader();
         final Class<?> systemAgentClassLoaderReferenceClass = systemClassLoader
                 .loadClass(agentClassLoaderReferenceClass.getName());
+
+        final Method containsAgentClassLoaderMethod = systemAgentClassLoaderReferenceClass
+                .getDeclaredMethod("containsAgentClassLoader", String.class);
+        final boolean containsAgentClassLoader = (boolean) containsAgentClassLoaderMethod.invoke(null, uuid);
+        if (containsAgentClassLoader) {
+            throw new IllegalStateException("UUID already used: " + uuid);
+        }
+
         final Method setAgentClassLoaderMethod = systemAgentClassLoaderReferenceClass
                 .getDeclaredMethod("setAgentClassLoader", String.class, ClassLoader.class);
-        setAgentClassLoaderMethod.invoke(null, uuid, DynamicInstrumentationReflections.getContextClassLoader());
+        final ClassLoader contextClassLoader = DynamicInstrumentationReflections.getContextClassLoader();
+        setAgentClassLoaderMethod.invoke(null, uuid, contextClassLoader);
     }
 
     private static File createDefaultTempAgentJar(final String uuid) throws ClassNotFoundException {
@@ -283,7 +311,11 @@ public final class DynamicInstrumentationLoader {
         final JarOutputStream tempJarOut = new JarOutputStream(new FileOutputStream(tempAgentJar), manifest);
         final JarEntry entry = new JarEntry(className.replace(".", "/") + ".class");
         tempJarOut.putNextEntry(entry);
-        IOUtils.copy(classIn, tempJarOut);
+        try {
+            IOUtils.copy(classIn, tempJarOut);
+        } catch (final EOFException e) {
+            //ignore, can happen in MpjExpress
+        }
         tempJarOut.closeEntry();
         if (additionalClasses != null) {
             for (final Class<?> additionalClazz : additionalClasses) {

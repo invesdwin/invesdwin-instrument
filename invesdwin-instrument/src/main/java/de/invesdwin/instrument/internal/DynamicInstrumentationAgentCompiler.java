@@ -16,27 +16,13 @@ public final class DynamicInstrumentationAgentCompiler {
     public static final String UUID_PLACEHOLDER = "<UUID>";
     public static final String TEMPLATE = DynamicInstrumentationAgent.class.getSimpleName() + ".java.template";
 
-    public static final int FIRST_PRECOMPILED_UUID = 1;
-    public static final int MAX_PRECOMPILED_UUID = 25;
-    private static int nextPrecompiledUuid = FIRST_PRECOMPILED_UUID;
-
-    private DynamicInstrumentationAgentCompiler() {
-    }
+    private DynamicInstrumentationAgentCompiler() {}
 
     public static DynamicInstrumentationClassInfo precompiled(final String uuid) {
         final String className = DynamicInstrumentationAgent.class.getSimpleName() + "_" + uuid;
         final String fqdn = DynamicInstrumentationAgent.class.getName() + "_" + uuid;
         final byte[] bytes = readPrecompiled(className);
         return new DynamicInstrumentationClassInfo(fqdn, bytes);
-    }
-
-    public static synchronized String nextPrecompiledUuid() {
-        if (nextPrecompiledUuid > MAX_PRECOMPILED_UUID) {
-            return null;
-        }
-        final String uuid = String.valueOf(nextPrecompiledUuid);
-        nextPrecompiledUuid++;
-        return uuid;
     }
 
     public static String nextCompileUuid() {
