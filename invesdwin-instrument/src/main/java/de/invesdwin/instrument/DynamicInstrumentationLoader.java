@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
@@ -171,8 +172,35 @@ public final class DynamicInstrumentationLoader {
 
     private static void addAgentClassLoaderReferenceToSystemClassLoader() throws Exception {
         final Class<AgentClassLoaderReference> agentClassLoaderReferenceClass = AgentClassLoaderReference.class;
-        final File tempAgentClassLoaderJar = createTempJar(agentClassLoaderReferenceClass, null, false);
-        DynamicInstrumentationReflections.addPathToSystemClassLoader(tempAgentClassLoaderJar);
+        final ClassLoader systemClassLoader = DynamicInstrumentationReflections.getSystemClassLoader();
+        final long startNanos = System.nanoTime();
+        final long timeoutNanos = TimeUnit.NANOSECONDS.convert(5, TimeUnit.SECONDS);
+        while (!hasAgentClassLoaderReferenceInSystemClassLoader(agentClassLoaderReferenceClass, systemClassLoader)) {
+            final File tempAgentClassLoaderJar = createTempJar(agentClassLoaderReferenceClass, null, false, false);
+            //will be null when another thread has already created the jar
+            if (tempAgentClassLoaderJar != null) {
+                DynamicInstrumentationReflections.addPathToSystemClassLoader(tempAgentClassLoaderJar);
+            } else {
+                //wait for other thread to finish adding the class to the system class loader
+                TimeUnit.MILLISECONDS.sleep(100);
+            }
+            if (System.nanoTime() - startNanos > timeoutNanos) {
+                throw new TimeoutException("Unable to load " + agentClassLoaderReferenceClass.getSimpleName()
+                        + " into system class loader");
+            }
+        }
+    }
+
+    private static boolean hasAgentClassLoaderReferenceInSystemClassLoader(
+            final Class<AgentClassLoaderReference> agentClassLoaderReferenceClass,
+            final ClassLoader systemClassLoader) {
+        try {
+            final Class<?> systemAgentClassLoaderReferenceClass = systemClassLoader
+                    .loadClass(agentClassLoaderReferenceClass.getName());
+            return systemAgentClassLoaderReferenceClass != null;
+        } catch (final ClassNotFoundException e) {
+            return false;
+        }
     }
 
     private static void loadAgent(final File tempAgentJar, final String pid, final String uuid) throws Exception {
@@ -181,7 +209,7 @@ public final class DynamicInstrumentationLoader {
         } else {
             //-Djdk.attach.allowAttachSelf https://www.bountysource.com/issues/45231289-self-attach-fails-on-jdk9
             //workaround this limitation by attaching from a new process
-            final File loadAgentJar = createTempJar(DynamicInstrumentationLoadAgentMain.class, uuid, false,
+            final File loadAgentJar = createTempJar(DynamicInstrumentationLoadAgentMain.class, uuid, false, true,
                     de.invesdwin.instrument.internal.DummyAttachProvider.class);
             final String javaExecutable = getJavaHome() + File.separator + "bin" + File.separator + "java";
             final List<String> command = new ArrayList<String>();
@@ -233,7 +261,7 @@ public final class DynamicInstrumentationLoader {
 
     private static File createDefaultTempAgentJar(final String uuid) throws ClassNotFoundException {
         try {
-            return createTempJar(DynamicInstrumentationAgent.class, uuid, true);
+            return createTempJar(DynamicInstrumentationAgent.class, uuid, true, true);
         } catch (final Throwable e) {
             throw newClassNotFoundException(
                     "de.invesdwin.instrument.internal.DynamicInstrumentationAgent_" + uuid + ".class", e);
@@ -245,7 +273,7 @@ public final class DynamicInstrumentationLoader {
             final DynamicInstrumentationClassInfo classInfo = DynamicInstrumentationAgentCompiler.precompiled(uuid);
             final String className = classInfo.toString();
             try (InputStream classIn = classInfo.newInputStream()) {
-                return createTempJar(className, classIn, uuid, true);
+                return createTempJar(className, classIn, uuid, true, true);
             }
         } catch (final Throwable e) {
             throw newClassNotFoundException(
@@ -268,7 +296,7 @@ public final class DynamicInstrumentationLoader {
             final DynamicInstrumentationClassInfo classInfo = DynamicInstrumentationAgentCompiler.compile(uuid);
             final String className = classInfo.toString();
             try (InputStream classIn = classInfo.newInputStream()) {
-                return createTempJar(className, classIn, uuid, true);
+                return createTempJar(className, classIn, uuid, true, true);
             }
         } catch (final Throwable e) {
             throw newClassNotFoundException(
@@ -277,11 +305,11 @@ public final class DynamicInstrumentationLoader {
     }
 
     private static File createTempJar(final Class<?> clazz, final String uuid, final boolean agent,
-            final Class<?>... additionalClasses) throws Exception {
+            final boolean overwrite, final Class<?>... additionalClasses) throws Exception {
         try {
             final String className = clazz.getName();
             try (InputStream classIn = DynamicInstrumentationReflections.getClassInputStream(clazz)) {
-                return createTempJar(className, classIn, uuid, agent, additionalClasses);
+                return createTempJar(className, classIn, uuid, agent, overwrite, additionalClasses);
             }
         } catch (final Throwable e) {
             throw newClassNotFoundException(clazz.getName() + ".class", e);
@@ -292,7 +320,7 @@ public final class DynamicInstrumentationLoader {
      * Creates a new jar that only contains the DynamicInstrumentationAgent class.
      */
     private static File createTempJar(final String className, final InputStream classIn, final String uuid,
-            final boolean agent, final Class<?>... additionalClasses) throws Exception {
+            final boolean agent, final boolean overwrite, final Class<?>... additionalClasses) throws Exception {
         final StringBuilder fileName = new StringBuilder(className);
         if (uuid != null) {
             fileName.append("_");
@@ -300,6 +328,9 @@ public final class DynamicInstrumentationLoader {
         }
         fileName.append(".jar");
         final File tempAgentJar = new File(DynamicInstrumentationProperties.TEMP_DIRECTORY, fileName.toString());
+        if (!overwrite && tempAgentJar.exists()) {
+            return null;
+        }
         final Manifest manifest = new Manifest(
                 DynamicInstrumentationLoader.class.getResourceAsStream("/META-INF/MANIFEST.MF"));
         if (agent) {
