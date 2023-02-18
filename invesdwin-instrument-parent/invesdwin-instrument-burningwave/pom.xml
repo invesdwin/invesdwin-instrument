@@ -14,7 +14,7 @@
 			<artifactId>core</artifactId>
 		</dependency>
 	</dependencies>
-	
+
 	<build>
 		<plugins>
 			<plugin>
@@ -29,6 +29,78 @@
 							<Can-Retransform-Classes>false</Can-Retransform-Classes>
 						</manifestEntries>
 					</archive>
+				</configuration>
+			</plugin>
+			<plugin>
+				<!-- distributions need to add this plugin manually to build a uber-jar -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>de.invesdwin</groupId>
+						<artifactId>invesdwin-maven-plugin</artifactId>
+						<version>${project.version.invesdwin-maven-plugin}</version>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<shadedArtifactAttached>true</shadedArtifactAttached>
+					<shadedClassifierName>standalone</shadedClassifierName>
+					<transformers>
+						<transformer implementation="org.apache.maven.plugins.shade.resource.ComponentsXmlResourceTransformer" />
+						<transformer implementation="org.apache.maven.plugins.shade.resource.PluginXmlResourceTransformer" />
+						<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+						<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>META-INF/spring.handlers</resource>
+						</transformer>
+						<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>META-INF/spring.schemas</resource>
+						</transformer>
+						<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>META-INF/spring.tooling</resource>
+						</transformer>
+						<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>META-INF/spring.factories</resource>
+						</transformer>
+						<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>META-INF/cxf/bus-extensions.txt</resource>
+						</transformer>
+						<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>META-INF/mime.types</resource>
+						</transformer>
+						<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>jasperreports_extension.properties</resource>
+						</transformer>
+						<transformer implementation="de.invesdwin.maven.plugin.shade.WebFragmentTransformer">
+							<resource>META-INF/web-fragment.xml</resource>
+						</transformer>
+						<transformer implementation="de.invesdwin.maven.plugin.shade.WebFragmentTransformer">
+							<resource>META-INF/web/web-fragment.xml</resource>
+						</transformer>
+						<transformer implementation="org.apache.maven.plugins.shade.resource.XmlAppendingTransformer">
+							<resource>META-INF/aop.xml</resource>
+						</transformer>
+						<transformer implementation="org.apache.maven.plugins.shade.resource.XmlAppendingTransformer">
+							<resource>META-INF/wsdl.plugin.xml</resource>
+						</transformer>
+					</transformers>
+					<filters>
+						<filter>
+							<artifact>*:*</artifact>
+							<excludes>
+								<exclude>META-INF/*.SF</exclude>
+								<exclude>META-INF/*.DSA</exclude>
+								<exclude>META-INF/*.RSA</exclude>
+							</excludes>
+						</filter>
+					</filters>
 				</configuration>
 			</plugin>
 		</plugins>
