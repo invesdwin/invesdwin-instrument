@@ -19,6 +19,7 @@
 
 	<modules>
 		<module>invesdwin-instrument</module>
+		<module>invesdwin-instrument-burningwave</module>
 	</modules>
 
 	<properties>
@@ -139,16 +140,6 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>${version.maven-jar-plugin}</version>
-				<configuration>
-					<archive>
-						<manifestEntries>
-							<Premain-Class>de.invesdwin.instrument.internal.DynamicInstrumentationAgent</Premain-Class>
-							<Agent-Class>de.invesdwin.instrument.internal.DynamicInstrumentationAgent</Agent-Class>
-							<Can-Redefine-Classes>true</Can-Redefine-Classes>
-							<Can-Retransform-Classes>true</Can-Retransform-Classes>
-						</manifestEntries>
-					</archive>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>
