@@ -4,7 +4,6 @@
 		<groupId>de.invesdwin</groupId>
 		<artifactId>invesdwin-instrument-parent</artifactId>
 		<version>1.0.15-SNAPSHOT</version>
-		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<artifactId>invesdwin-instrument</artifactId>
 	<packaging>jar</packaging>
