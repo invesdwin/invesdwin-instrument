@@ -70,7 +70,7 @@ See discussion [here](https://stackoverflow.com/a/70348250/67492). The workaroun
 
 ### Burningwave Java Agent
 
-With invesdwin-instrument-burningwave you can sometimes launch external applications on newer Java versions without having to add any add-opens commands. The java agent automatically opens all modules when being used via `StaticComponentContainer.Modules.exportAllToAll()` from [burningwave](https://www.burningwave.org/). This agent needs to be specified manually via `-javaagent:/path/to/invesdwin-instrument-burningwave.jar`. It does not load itself into the running process because you can just call burningwave yourself if you can modify your application anyway.
+With invesdwin-instrument-burningwave you can sometimes launch external applications on newer Java versions without having to add any `--add-opens` arguments (or at least test if this is the only problem with newer Java versions). The java agent automatically opens all modules when being used via `StaticComponentContainer.Modules.exportAllToAll()` from [burningwave](https://www.burningwave.org/). This agent needs to be specified manually via `-javaagent:/path/to/invesdwin-instrument-burningwave.jar`. It does not load itself into the running process because you can just call burningwave yourself if you can modify your application anyway.
 
 ## Support
 
