@@ -56,7 +56,7 @@ To enable the spring aspects, just add the [spring-aspects.jar](http://mvnreposi
 Make sure that the instrumentation is loaded before the classes of the aspects or the classes that use the aspects are loaded by the classloader. Only classes that get loaded after initializing load time weaving will be successfully woven by aspectj.
 
 Please note that you need to have a JDK installed with `tools.jar` available in it for this to work properly (this is not required anymore since Java 9).
-Alternatively just load the invesdwin-instrument jar via the `-javaagent <path>` JVM parameter if you only have a JRE installed. The dynamic loading will be skipped then.
+Alternatively just load the invesdwin-instrument jar via the `-javaagent:/path/to/invesdwin-instrument.jar` JVM parameter if you only have a JRE installed. The dynamic loading will be skipped then.
 
 For a sample usage see the junit test cases in the [invesdwin-aspects](https://github.com/subes/invesdwin-aspects) project or the spring-boot example project in [invesdwin-nowicket](https://github.com/subes/invesdwin-nowicket).
 
@@ -67,6 +67,10 @@ Note that [spring-boot-devtools](https://docs.spring.io/spring-boot/docs/current
 ### Testing Aspects inside Unit Tests
 
 See discussion [here](https://stackoverflow.com/a/70348250/67492). The workaround is to use the aspects inside nested classes that are loaded after invesdwin-instrument is initialized by the unit test class. Example [here](https://github.com/invesdwin/invesdwin-context-persistence/blob/master/invesdwin-context-persistence-parent/invesdwin-context-persistence-jpa-hibernate/src/test/java/de/invesdwin/context/persistence/jpa/hibernate/MultiplePersistenceUnitsTest.java).
+
+### Burningwave Java Agent
+
+With invesdwin-instrument-burningwave you can sometimes launch external applications on newer Java versions without having to add any add-opens commands. The java agent automatically opens all modules when being used via `StaticComponentContainer.Modules.exportAllToAll()` from [burningwave](https://www.burningwave.org/). This agent needs to be specified manually via `-javaagent:/path/to/invesdwin-instrument-burningwave.jar`. It does not load itself into the running process because you can just call burningwave yourself if you can modify your application anyway.
 
 ## Support
 
