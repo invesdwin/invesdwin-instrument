@@ -1,3 +1,3 @@
 @Library('global-shared-library') _
 
-buildTestDeploy(pomFolderPath: "invesdwin-instrument")
+buildTestDeploy(pomFolderPath: "invesdwin-instrument-parent")
