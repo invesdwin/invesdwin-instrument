@@ -155,7 +155,7 @@ public final class DynamicInstrumentationCompiler {
     }
 
     private static File getTmpDir() throws IOException {
-        final String name = DynamicInstrumentationProperties.TEMP_DIRECTORY + "/"
+        final String name = DynamicInstrumentationProperties.PROCESS_TEMP_DIRECTORY + "/"
                 + DynamicInstrumentationCompiler.class.getSimpleName();
         final File rootDir = new File(name);
         if (!rootDir.mkdir()) {

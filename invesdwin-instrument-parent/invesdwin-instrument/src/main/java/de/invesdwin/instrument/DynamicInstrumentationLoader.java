@@ -327,7 +327,7 @@ public final class DynamicInstrumentationLoader {
             fileName.append(uuid);
         }
         fileName.append(".jar");
-        final File tempAgentJar = new File(DynamicInstrumentationProperties.TEMP_DIRECTORY, fileName.toString());
+        final File tempAgentJar = new File(DynamicInstrumentationProperties.PROCESS_TEMP_DIRECTORY, fileName.toString());
         if (!overwrite && tempAgentJar.exists()) {
             return null;
         }

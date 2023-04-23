@@ -11,15 +11,17 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 public final class DynamicInstrumentationProperties {
 
-    public static final String TEMP_DIRECTORY_PARENT_NAME;
+    public static final File SYSTEM_TEMP_DIRECTORY;
     /**
      * Process specific temp dir that gets cleaned on exit.
      */
-    public static final File TEMP_DIRECTORY;
+    public static final File USER_TEMP_DIRECTORY;
+    public static final File PROCESS_TEMP_DIRECTORY;
+    public static final String USER_TEMP_DIRECTORY_NAME;
     private static Runnable deleteTempDirectoryRunner = new Runnable() {
         @Override
         public void run() {
-            org.apache.commons.io.FileUtils.deleteQuietly(TEMP_DIRECTORY);
+            org.apache.commons.io.FileUtils.deleteQuietly(PROCESS_TEMP_DIRECTORY);
         }
     };
 
@@ -30,17 +32,17 @@ public final class DynamicInstrumentationProperties {
         if (systemTempDir == null) {
             systemTempDir = System.getProperty("java.io.tmpdir");
         }
+        SYSTEM_TEMP_DIRECTORY = new File(systemTempDir, "invesdwin");
         final String username = System.getProperty("user.name");
-        TEMP_DIRECTORY_PARENT_NAME = "invesdwin_temp_" + username.replaceAll("[^a-zA-Z0-9]", "");
         //CHECKSTYLE:ON
-        final File baseDirectory = new File(systemTempDir, TEMP_DIRECTORY_PARENT_NAME);
-        TEMP_DIRECTORY = newTempDirectory(baseDirectory);
+        USER_TEMP_DIRECTORY_NAME = username.replaceAll("[^a-zA-Z0-9]", "");
+        USER_TEMP_DIRECTORY = new File(SYSTEM_TEMP_DIRECTORY, USER_TEMP_DIRECTORY_NAME);
+        PROCESS_TEMP_DIRECTORY = newProcessTempDirectory(USER_TEMP_DIRECTORY);
     }
 
-    private DynamicInstrumentationProperties() {
-    }
+    private DynamicInstrumentationProperties() {}
 
-    public static File newTempDirectory(final File baseDirectory) {
+    public static File newProcessTempDirectory(final File baseDirectory) {
         final File tempDir = findEmptyTempDir(baseDirectory);
         forceMkdirRetry(baseDirectory, tempDir);
         Runtime.getRuntime().addShutdownHook(new Thread() {
