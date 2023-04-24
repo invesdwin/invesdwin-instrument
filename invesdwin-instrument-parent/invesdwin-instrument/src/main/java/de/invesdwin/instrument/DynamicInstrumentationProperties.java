@@ -32,10 +32,14 @@ public final class DynamicInstrumentationProperties {
         if (systemTempDir == null) {
             systemTempDir = System.getProperty("java.io.tmpdir");
         }
-        SYSTEM_TEMP_DIRECTORY = new File(systemTempDir, "invesdwin");
+        SYSTEM_TEMP_DIRECTORY = new File(systemTempDir);
         final String username = System.getProperty("user.name");
         //CHECKSTYLE:ON
-        USER_TEMP_DIRECTORY_NAME = username.replaceAll("[^a-zA-Z0-9]", "");
+        /*
+         * we can not use a shared "invesdwin" folder for all users because permissions would hinder one user from
+         * creating another folder in the invesdwin folder, so use a flat structure instead
+         */
+        USER_TEMP_DIRECTORY_NAME = "invesdwin_temp_" + username.replaceAll("[^a-zA-Z0-9]", "");
         USER_TEMP_DIRECTORY = new File(SYSTEM_TEMP_DIRECTORY, USER_TEMP_DIRECTORY_NAME);
         PROCESS_TEMP_DIRECTORY = newProcessTempDirectory(USER_TEMP_DIRECTORY);
     }
