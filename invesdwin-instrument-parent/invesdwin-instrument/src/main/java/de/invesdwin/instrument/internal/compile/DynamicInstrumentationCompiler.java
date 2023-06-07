@@ -24,8 +24,7 @@ import de.invesdwin.instrument.DynamicInstrumentationProperties;
 //@NotThreadSafe
 public final class DynamicInstrumentationCompiler {
 
-    private DynamicInstrumentationCompiler() {
-    }
+    private DynamicInstrumentationCompiler() {}
 
     /**
      * Given a list of file-scope java code (equivalent to a .java file, including package and import declarations),
