@@ -30,3 +30,7 @@
 /.temp-*.txt
 /dependency-reduced-pom.xml
 /META-INF
+/.Rproj.user
+/.Rhistory
+/.RData
+/.Ruserdata
