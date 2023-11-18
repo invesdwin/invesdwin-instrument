@@ -3,9 +3,12 @@ package de.invesdwin.instrument;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.instrument.Instrumentation;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -192,25 +195,49 @@ public final class DynamicInstrumentationReflections {
 
     /**
      * http://stackoverflow.com/questions/11134159/how-to-load-attachprovider-attach-dll-dynamically
+     * 
+     * https://stackoverflow.com/a/70126075
      */
     public static void addPathToJavaLibraryPath(final File dir) {
         if (dir == null) {
             return;
         }
+        final String javaLibraryPathKey = "java.library.path";
+        //CHECKSTYLE:OFF
+        final String existingJavaLibraryPath = System.getProperty(javaLibraryPathKey);
+        //CHECKSTYLE:ON
+        final String newJavaLibraryPath;
+        if (!org.springframework.util.StringUtils.hasLength(existingJavaLibraryPath)) {
+            newJavaLibraryPath = existingJavaLibraryPath + File.pathSeparator + dir.getAbsolutePath();
+        } else {
+            newJavaLibraryPath = dir.getAbsolutePath();
+        }
+        //CHECKSTYLE:OFF
+        System.setProperty(javaLibraryPathKey, newJavaLibraryPath);
+        //CHECKSTYLE:ON
         try {
-            final String javaLibraryPathKey = "java.library.path";
-            //CHECKSTYLE:OFF
-            final String existingJavaLibraryPath = System.getProperty(javaLibraryPathKey);
-            //CHECKSTYLE:ON
-            final String newJavaLibraryPath;
-            if (!org.springframework.util.StringUtils.hasLength(existingJavaLibraryPath)) {
-                newJavaLibraryPath = existingJavaLibraryPath + File.pathSeparator + dir.getAbsolutePath();
-            } else {
-                newJavaLibraryPath = dir.getAbsolutePath();
-            }
-            //CHECKSTYLE:OFF
-            System.setProperty(javaLibraryPathKey, newJavaLibraryPath);
-            //CHECKSTYLE:ON
+            final Class<?> nativeLibrariesClass = Class.forName("jdk.internal.loader.NativeLibraries");
+            final Class<?>[] declClassArr = nativeLibrariesClass.getDeclaredClasses();
+            final Class<?> libraryPaths = java.util.Arrays.stream(declClassArr)
+                    .filter(klass -> klass.getSimpleName().equals("LibraryPaths"))
+                    .findFirst()
+                    .get();
+            final Field field = libraryPaths.getDeclaredField("USER_PATHS");
+            final MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(Field.class, MethodHandles.lookup());
+            final VarHandle varHandle = lookup.findVarHandle(Field.class, "modifiers", int.class);
+            varHandle.set(field, field.getModifiers() & ~Modifier.FINAL);
+        } catch (final NoSuchFieldException | ClassNotFoundException e) {
+            //retry different approach, this might happen on older JVMs
+            addPathToJavaLibraryPathJavaOld();
+        } catch (final SecurityException e) {
+            throw new RuntimeException(e);
+        } catch (final IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void addPathToJavaLibraryPathJavaOld() {
+        try {
             final Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
             fieldSysPath.setAccessible(true);
             fieldSysPath.set(ClassLoader.class, null);
@@ -219,6 +246,7 @@ public final class DynamicInstrumentationReflections {
              * ignore, happens on ibm-jdk-8 and adoptopenjdk-8-openj9 but has no influence since there is no cached
              * field that needs a reset
              */
+            return;
         } catch (final SecurityException e) {
             org.springframework.util.ReflectionUtils.handleReflectionException(e);
         } catch (final IllegalArgumentException e) {
