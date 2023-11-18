@@ -223,9 +223,16 @@ public final class DynamicInstrumentationReflections {
                     .findFirst()
                     .get();
             final Field field = libraryPaths.getDeclaredField("USER_PATHS");
-            final MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(Field.class, MethodHandles.lookup());
-            final VarHandle varHandle = lookup.findVarHandle(Field.class, "modifiers", int.class);
-            varHandle.set(field, field.getModifiers() & ~Modifier.FINAL);
+            field.setAccessible(true);
+            removeFinalModifier(field);
+
+            final String[] paths = (String[]) field.get(null);
+            final String[] newPaths = new String[paths.length + 1];
+            for (int i = 0; i < paths.length; i++) {
+                newPaths[i] = paths[i];
+            }
+            newPaths[newPaths.length - 1] = dir.getAbsolutePath();
+            field.set(null, newPaths);
         } catch (final NoSuchFieldException | ClassNotFoundException e) {
             //retry different approach, this might happen on older JVMs
             addPathToJavaLibraryPathJavaOld();
@@ -234,6 +241,12 @@ public final class DynamicInstrumentationReflections {
         } catch (final IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static void removeFinalModifier(final Field field) throws IllegalAccessException, NoSuchFieldException {
+        final MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(Field.class, MethodHandles.lookup());
+        final VarHandle varHandle = lookup.findVarHandle(Field.class, "modifiers", int.class);
+        varHandle.set(field, field.getModifiers() & ~Modifier.FINAL);
     }
 
     private static void addPathToJavaLibraryPathJavaOld() {
