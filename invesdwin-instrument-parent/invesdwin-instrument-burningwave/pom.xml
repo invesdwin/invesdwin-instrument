@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>de.invesdwin</groupId>
@@ -23,8 +25,10 @@
 				<configuration>
 					<archive>
 						<manifestEntries>
-							<Premain-Class>de.invesdwin.instrument.burningwave.BurningwaveInstrumentationAgent</Premain-Class>
-							<Agent-Class>de.invesdwin.instrument.burningwave.BurningwaveInstrumentationAgent</Agent-Class>
+							<Premain-Class>
+								de.invesdwin.instrument.burningwave.BurningwaveInstrumentationAgent</Premain-Class>
+							<Agent-Class>
+								de.invesdwin.instrument.burningwave.BurningwaveInstrumentationAgent</Agent-Class>
 							<Can-Redefine-Classes>false</Can-Redefine-Classes>
 							<Can-Retransform-Classes>false</Can-Retransform-Classes>
 						</manifestEntries>
@@ -32,7 +36,8 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<!-- distributions need to add this plugin manually to build a uber-jar -->
+				<!-- distributions need to add this plugin manually to build a
+				uber-jar -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
 				<executions>
@@ -54,40 +59,154 @@
 					<shadedArtifactAttached>true</shadedArtifactAttached>
 					<shadedClassifierName>standalone</shadedClassifierName>
 					<transformers>
-						<transformer implementation="org.apache.maven.plugins.shade.resource.ComponentsXmlResourceTransformer" />
-						<transformer implementation="org.apache.maven.plugins.shade.resource.PluginXmlResourceTransformer" />
-						<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-						<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.ComponentsXmlResourceTransformer" />
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.PluginXmlResourceTransformer" />
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
 							<resource>META-INF/spring.handlers</resource>
 						</transformer>
-						<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
 							<resource>META-INF/spring.schemas</resource>
 						</transformer>
-						<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
 							<resource>META-INF/spring.tooling</resource>
 						</transformer>
-						<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
 							<resource>META-INF/spring.factories</resource>
 						</transformer>
-						<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
 							<resource>META-INF/cxf/bus-extensions.txt</resource>
 						</transformer>
-						<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
 							<resource>META-INF/mime.types</resource>
 						</transformer>
-						<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
 							<resource>jasperreports_extension.properties</resource>
 						</transformer>
-						<transformer implementation="de.invesdwin.maven.plugin.shade.WebFragmentTransformer">
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>ValidationMessages.properties</resource>
+						</transformer>
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>ValidationMessages_ar.properties</resource>
+						</transformer>
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>ValidationMessages_cs.properties</resource>
+						</transformer>
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>ValidationMessages_da.properties</resource>
+						</transformer>
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>ValidationMessages_de.properties</resource>
+						</transformer>
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>ValidationMessages_en.properties</resource>
+						</transformer>
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>ValidationMessages_es.properties</resource>
+						</transformer>
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>ValidationMessages_fa.properties</resource>
+						</transformer>
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>ValidationMessages_fr.properties</resource>
+						</transformer>
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>ValidationMessages_hu.properties</resource>
+						</transformer>
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>ValidationMessages_it.properties</resource>
+						</transformer>
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>ValidationMessages_ja.properties</resource>
+						</transformer>
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>ValidationMessages_ko.properties</resource>
+						</transformer>
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>ValidationMessages_mn_MN.properties</resource>
+						</transformer>
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>ValidationMessages_nl.properties</resource>
+						</transformer>
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>ValidationMessages_pl.properties</resource>
+						</transformer>
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>ValidationMessages_pt_BR.properties</resource>
+						</transformer>
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>ValidationMessages_ro.properties</resource>
+						</transformer>
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>ValidationMessages_ru.properties</resource>
+						</transformer>
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>ValidationMessages_sk.properties</resource>
+						</transformer>
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>ValidationMessages_tr.properties</resource>
+						</transformer>
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>ValidationMessages_uk.properties</resource>
+						</transformer>
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>ValidationMessages_zh_CN.properties</resource>
+						</transformer>
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>ValidationMessages_zh_TW.properties</resource>
+						</transformer>
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+							<resource>ValidationMessages_zh.properties</resource>
+						</transformer>
+						<transformer
+							implementation="de.invesdwin.maven.plugin.shade.WebFragmentTransformer">
 							<resource>META-INF/web-fragment.xml</resource>
 						</transformer>
-						<transformer implementation="de.invesdwin.maven.plugin.shade.WebFragmentTransformer">
+						<transformer
+							implementation="de.invesdwin.maven.plugin.shade.WebFragmentTransformer">
 							<resource>META-INF/web/web-fragment.xml</resource>
 						</transformer>
-						<transformer implementation="org.apache.maven.plugins.shade.resource.XmlAppendingTransformer">
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.XmlAppendingTransformer">
 							<resource>META-INF/aop.xml</resource>
 						</transformer>
-						<transformer implementation="org.apache.maven.plugins.shade.resource.XmlAppendingTransformer">
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.XmlAppendingTransformer">
 							<resource>META-INF/wsdl.plugin.xml</resource>
 						</transformer>
 					</transformers>
