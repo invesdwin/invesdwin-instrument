@@ -105,4 +105,10 @@ public final class DynamicInstrumentationProperties {
         return pid;
     }
 
+    public static String getProcessName() {
+        final String nameOfRunningVM = ManagementFactory.getRuntimeMXBean().getName();
+        final String name = nameOfRunningVM.substring(nameOfRunningVM.indexOf('@') + 1, nameOfRunningVM.length());
+        return name;
+    }
+
 }
