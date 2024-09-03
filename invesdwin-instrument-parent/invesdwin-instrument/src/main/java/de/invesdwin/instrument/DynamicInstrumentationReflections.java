@@ -243,7 +243,7 @@ public final class DynamicInstrumentationReflections {
         }
     }
 
-    private static void removeFinalModifier(final Field field) throws IllegalAccessException, NoSuchFieldException {
+    public static void removeFinalModifier(final Field field) throws IllegalAccessException, NoSuchFieldException {
         final MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(Field.class, MethodHandles.lookup());
         final VarHandle varHandle = lookup.findVarHandle(Field.class, "modifiers", int.class);
         varHandle.set(field, field.getModifiers() & ~Modifier.FINAL);
