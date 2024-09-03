@@ -3,8 +3,6 @@ package de.invesdwin.instrument;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.instrument.Instrumentation;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -22,6 +20,8 @@ import javax.annotation.concurrent.Immutable;
 
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.instrument.InstrumentationSavingAgent;
+
+import de.invesdwin.instrument.internal.RemoveFinalModifierJava9;
 
 @Immutable
 public final class DynamicInstrumentationReflections {
@@ -244,9 +244,15 @@ public final class DynamicInstrumentationReflections {
     }
 
     public static void removeFinalModifier(final Field field) throws IllegalAccessException, NoSuchFieldException {
-        final MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(Field.class, MethodHandles.lookup());
-        final VarHandle varHandle = lookup.findVarHandle(Field.class, "modifiers", int.class);
-        varHandle.set(field, field.getModifiers() & ~Modifier.FINAL);
+        try {
+            RemoveFinalModifierJava9.removeFinalModifierJava9(field);
+        } catch (final Throwable t) {
+            //fallback to how this was done in java 8
+            final Field modifiersField = Field.class.getDeclaredField("modifiers");
+            modifiersField.setAccessible(true);
+            modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+        }
+
     }
 
     private static void addPathToJavaLibraryPathJavaOld() {
