@@ -21,6 +21,7 @@ import javax.annotation.concurrent.Immutable;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.instrument.InstrumentationSavingAgent;
 
+import de.invesdwin.instrument.internal.RemoveFinalModifierJava21;
 import de.invesdwin.instrument.internal.RemoveFinalModifierJava9;
 
 @Immutable
@@ -224,7 +225,6 @@ public final class DynamicInstrumentationReflections {
                     .get();
             final Field field = libraryPaths.getDeclaredField("USER_PATHS");
             field.setAccessible(true);
-            removeFinalModifier(field);
 
             final String[] paths = (String[]) field.get(null);
             final String[] newPaths = new String[paths.length + 1];
@@ -232,27 +232,44 @@ public final class DynamicInstrumentationReflections {
                 newPaths[i] = paths[i];
             }
             newPaths[newPaths.length - 1] = dir.getAbsolutePath();
-            field.set(null, newPaths);
-        } catch (final NoSuchFieldException | ClassNotFoundException e) {
+            setStaticFinalField(field, newPaths);
+        } catch (final NoSuchFieldException | NoSuchMethodException | InstantiationException
+                | ClassNotFoundException e) {
             //retry different approach, this might happen on older JVMs
             addPathToJavaLibraryPathJavaOld();
-        } catch (final SecurityException e) {
-            throw new RuntimeException(e);
-        } catch (final IllegalAccessException e) {
+        } catch (final SecurityException | IllegalAccessException | IllegalArgumentException
+                | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
     }
 
     public static void removeFinalModifier(final Field field) throws IllegalAccessException, NoSuchFieldException {
         try {
-            RemoveFinalModifierJava9.removeFinalModifierJava9(field);
-        } catch (final Throwable t) {
-            //fallback to how this was done in java 8
-            final Field modifiersField = Field.class.getDeclaredField("modifiers");
-            modifiersField.setAccessible(true);
-            modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+            RemoveFinalModifierJava21.removeFinalModifierJava21(field);
+        } catch (final Throwable t1) {
+            try {
+                RemoveFinalModifierJava9.removeFinalModifierJava9(field);
+            } catch (final Throwable t2) {
+                //fallback to how this was done in java 8
+                final Field modifiersField = Field.class.getDeclaredField("modifiers");
+                modifiersField.setAccessible(true);
+                modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+            }
         }
+    }
 
+    //CHECKSTYLE:OFF
+    public static void setStaticFinalField(final Field field, final Object value)
+            throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException,
+            IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchFieldException {
+        //CHECKSTYLE:ON
+        DynamicInstrumentationReflections.removeFinalModifier(field);
+        try {
+            field.set(null, value);
+        } catch (final Throwable t) {
+            //since java 21 we need a more complex way of doing this
+            RemoveFinalModifierJava21.setRestrictedField(field, value);
+        }
     }
 
     private static void addPathToJavaLibraryPathJavaOld() {
