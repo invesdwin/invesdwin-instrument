@@ -27,10 +27,10 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<version.compiler>1.8</version.compiler>
 
-		<version.maven-source-plugin>3.2.1</version.maven-source-plugin>
-		<version.maven-processor-plugin>5.0</version.maven-processor-plugin>
+		<version.maven-source-plugin>3.4.0</version.maven-source-plugin>
+		<version.maven-processor-plugin>5.1</version.maven-processor-plugin>
 		<project.version.invesdwin-maven-plugin>1.0.14-SNAPSHOT</project.version.invesdwin-maven-plugin>
-		<version.maven-jar-plugin>3.3.0</version.maven-jar-plugin>
+		<version.maven-jar-plugin>3.5.0</version.maven-jar-plugin>
 		<version.maven-jdk-tools-wrapper>0.1</version.maven-jdk-tools-wrapper>
 	</properties>
 
