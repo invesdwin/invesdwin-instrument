@@ -10,7 +10,9 @@ public final class AgentClassLoaderReference {
     public static final int MAX_PRECOMPILED_UUID = 25;
     private static int nextPrecompiledUuid = FIRST_PRECOMPILED_UUID;
 
+    //CHECKSTYLE:OFF
     private static final Map<String, ClassLoader> UUID_AGENTCLASSLOADER = new ConcurrentHashMap<>();
+    //CHECKSTYLE:ON
 
     private AgentClassLoaderReference() {}
 

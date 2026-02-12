@@ -16,8 +16,8 @@ public class JdkFilesFinder {
 
     public JdkFilesFinder() {
         //determine the java home via the system variables
-        final Set<File> javaHomes = new LinkedHashSet<File>();
         //CHECKSTYLE:OFF
+        final Set<File> javaHomes = new LinkedHashSet<File>();
         for (final String javaHomeStr : new String[] { System.getenv("JAVA_HOME"), System.getProperty("java.home") }) {
             //CHECKSTYLE:ON
             if (!org.springframework.util.StringUtils.isEmpty(javaHomeStr)) {
@@ -45,7 +45,9 @@ public class JdkFilesFinder {
         });
         javaHomes.addAll(potentialOtherJavaHomes);
         //search for special subfolders that might contain the desired files
+        //CHECKSTYLE:OFF
         this.potentialFolders = new LinkedHashSet<File>();
+        //CHECKSTYLE:ON
         for (final File javaHome : javaHomes) {
             if (!org.springframework.util.StringUtils.isEmpty(javaHome)) {
                 for (final String folderName : new String[] { "bin", "lib" }) {

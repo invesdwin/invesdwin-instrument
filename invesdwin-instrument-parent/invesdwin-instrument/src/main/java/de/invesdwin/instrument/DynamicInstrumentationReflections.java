@@ -28,8 +28,10 @@ import de.invesdwin.instrument.internal.RemoveFinalModifierJava9;
 public final class DynamicInstrumentationReflections {
 
     private static final URL[] EMPTY_URLS = new URL[0];
+    //CHECKSTYLE:OFF
     private static Set<String> pathsAddedToSystemClassLoader = java.util.Collections
             .synchronizedSet(new HashSet<String>());
+    //CHECKSTYLE:ON
 
     private DynamicInstrumentationReflections() {}
 
