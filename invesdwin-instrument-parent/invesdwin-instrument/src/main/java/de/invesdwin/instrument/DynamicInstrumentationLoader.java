@@ -173,7 +173,9 @@ public final class DynamicInstrumentationLoader {
     private static void addAgentClassLoaderReferenceToSystemClassLoader() throws Exception {
         final Class<AgentClassLoaderReference> agentClassLoaderReferenceClass = AgentClassLoaderReference.class;
         final ClassLoader systemClassLoader = DynamicInstrumentationReflections.getSystemClassLoader();
+        //CHECKSTYLE:OFF
         final long startNanos = System.nanoTime();
+        //CHECKSTYLE:ON
         final long timeoutNanos = TimeUnit.NANOSECONDS.convert(5, TimeUnit.SECONDS);
         while (!hasAgentClassLoaderReferenceInSystemClassLoader(agentClassLoaderReferenceClass, systemClassLoader)) {
             final File tempAgentClassLoaderJar = createTempJar(agentClassLoaderReferenceClass, null, false, false);
@@ -184,7 +186,9 @@ public final class DynamicInstrumentationLoader {
                 //wait for other thread to finish adding the class to the system class loader
                 TimeUnit.MILLISECONDS.sleep(100);
             }
+            //CHECKSTYLE:OFF
             if (System.nanoTime() - startNanos > timeoutNanos) {
+                //CHECKSTYLE:ON
                 throw new TimeoutException("Unable to load " + agentClassLoaderReferenceClass.getSimpleName()
                         + " into system class loader");
             }
@@ -327,7 +331,8 @@ public final class DynamicInstrumentationLoader {
             fileName.append(uuid);
         }
         fileName.append(".jar");
-        final File tempAgentJar = new File(DynamicInstrumentationProperties.PROCESS_TEMP_DIRECTORY, fileName.toString());
+        final File tempAgentJar = new File(DynamicInstrumentationProperties.PROCESS_TEMP_DIRECTORY,
+                fileName.toString());
         if (!overwrite && tempAgentJar.exists()) {
             return null;
         }
