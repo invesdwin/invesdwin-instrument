@@ -89,7 +89,7 @@ public final class DynamicInstrumentationProperties {
     }
 
     private static File findEmptyTempDir(final File baseDirectory) {
-        File tempDir = new File(baseDirectory, ManagementFactory.getRuntimeMXBean().getName());
+        File tempDir = new File(baseDirectory, getManagementName());
         int retry = 0;
         while (tempDir.exists() && !org.apache.commons.io.FileUtils.deleteQuietly(tempDir)) {
             //no permission to delete folder (maybe different user had this pid before), choose a different one
@@ -99,14 +99,27 @@ public final class DynamicInstrumentationProperties {
         return tempDir;
     }
 
+    /**
+     * The PID of the JVM and the hostname of the machine, but can be overridden by the JVM to be anything
+     */
+    public static String getManagementName() {
+        return ManagementFactory.getRuntimeMXBean().getName();
+    }
+
+    /**
+     * The PID of the JVM, but can be overridden by the JVM to be anything
+     */
     public static String getProcessId() {
-        final String nameOfRunningVM = ManagementFactory.getRuntimeMXBean().getName();
+        final String nameOfRunningVM = getManagementName();
         final String pid = nameOfRunningVM.substring(0, nameOfRunningVM.indexOf('@'));
         return pid;
     }
 
+    /**
+     * The hostname of the machine, but can be overridden by the JVM to be anything
+     */
     public static String getProcessName() {
-        final String nameOfRunningVM = ManagementFactory.getRuntimeMXBean().getName();
+        final String nameOfRunningVM = getManagementName();
         final String name = nameOfRunningVM.substring(nameOfRunningVM.indexOf('@') + 1, nameOfRunningVM.length());
         return name;
     }
