@@ -6,6 +6,7 @@ import java.lang.management.ManagementFactory;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.Immutable;
 
 @Immutable
@@ -24,6 +25,12 @@ public final class DynamicInstrumentationProperties {
             org.apache.commons.io.FileUtils.deleteQuietly(PROCESS_TEMP_DIRECTORY);
         }
     };
+    @GuardedBy("none for performance")
+    private static String managementName;
+    @GuardedBy("none for performance")
+    private static String processId;
+    @GuardedBy("none for performance")
+    private static String processName;
 
     static {
         //CHECKSTYLE:OFF
@@ -103,13 +110,23 @@ public final class DynamicInstrumentationProperties {
      * The PID of the JVM and the hostname of the machine, but can be overridden by the JVM to be anything
      */
     public static String getManagementName() {
-        return ManagementFactory.getRuntimeMXBean().getName();
+        if (managementName == null) {
+            managementName = ManagementFactory.getRuntimeMXBean().getName();
+        }
+        return managementName;
     }
 
     /**
      * The PID of the JVM, but can be overridden by the JVM to be anything
      */
     public static String getProcessId() {
+        if (processId == null) {
+            processId = newProcessId();
+        }
+        return processId;
+    }
+
+    private static String newProcessId() {
         final String nameOfRunningVM = getManagementName();
         final String pid = nameOfRunningVM.substring(0, nameOfRunningVM.indexOf('@'));
         return pid;
@@ -119,6 +136,13 @@ public final class DynamicInstrumentationProperties {
      * The hostname of the machine, but can be overridden by the JVM to be anything
      */
     public static String getProcessName() {
+        if (processName == null) {
+            processName = newProcessName();
+        }
+        return processName;
+    }
+
+    private static String newProcessName() {
         final String nameOfRunningVM = getManagementName();
         final String name = nameOfRunningVM.substring(nameOfRunningVM.indexOf('@') + 1, nameOfRunningVM.length());
         return name;
