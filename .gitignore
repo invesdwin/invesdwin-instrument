@@ -1,2 +1,50 @@
 /.project
 **/.DS_Store
+# --- local AI coding-tool state ---------------------------------------------
+# Synced from the invesdwin-maven-plugin .settings/scm_ignore template (single
+# source of truth for generated projects). Per-developer, not project content;
+# several of these hold machine-specific paths or credentials, so they are
+# ignored deliberately. Patterns are unanchored, so they also match inside
+# nested module projects.
+.claude/
+CLAUDE.md
+.mcp.json
+AGENTS.md
+.codex/
+.cursor/
+.cursorrules
+.cursorignore
+.kilo/
+.kilocode/
+.kilocodeignore
+.roo/
+.rooignore
+.clinerules/
+.clinerules
+.windsurf/
+.windsurfrules
+.windsurfignore
+.gemini/
+.geminiignore
+GEMINI.md
+.qwen/
+QWEN.md
+.iflow/
+IFLOW.md
+.aider.conf.yml
+.aiderignore
+.continue/
+.junie/
+.openhands/
+.crush/
+.opencode/
+opencode.json
+.cody/
+.tabnine/
+.goosehints
+
+# GitHub Copilot, VS Code, Vite - and all of .github (issue templates,
+# workflows, everything; deliberately total - tracked files stay tracked)
+.github/
+.vscode/
+.vite/
